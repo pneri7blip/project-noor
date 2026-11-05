@@ -7,10 +7,10 @@
 
 **Goal:** establish a clear product direction and a testable scope.
 
-- [x] Create the public GitHub repository.
+- [x] Create the private GitHub repository for documentation and version history.
 - [x] Draft the initial product vision and principles.
 - [x] Define the first prototype scope.
-- [ ] Select the browser 3D framework.
+- [ ] Validate the proposed Three.js + TypeScript + Vite frontend on the target Android phone.
 - [ ] Define the Android test-device and browser baseline.
 - [ ] Establish an initial visual direction.
 

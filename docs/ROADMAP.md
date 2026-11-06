@@ -10,7 +10,7 @@
 - [x] Create the private GitHub repository for documentation and version history.
 - [x] Draft the initial product vision and principles.
 - [x] Define the first prototype scope.
-- [ ] Validate the proposed Three.js + TypeScript + Vite frontend on the target Android phone.
+- [ ] Build the initial Three.js + TypeScript + Vite prototype and validate it on the target Android phone.
 - [ ] Define the Android test-device and browser baseline.
 - [ ] Establish an initial visual direction.
 
@@ -85,8 +85,9 @@ These features add cost and risk before the core experience has been validated.
 
 ## Immediate next actions
 
-1. Choose a lightweight web 3D stack based on Android performance.
-2. Build only the courtyard, landmark, garden, and movement.
-3. Test on the actual Android device early.
-4. Record performance issues and usability observations.
-5. Iterate before adding religious content or social features.
+1. [x] Select Three.js + TypeScript + Vite for Prototype 01; see [engine decision](ENGINE-DECISION.md).
+2. [x] Add the first procedural courtyard, landmark, garden, placeholder avatar, and touch interaction implementation.
+3. [ ] Run a production build and resolve any compiler/runtime issues.
+4. [ ] Publish a shareable HTTPS preview without making the private source repository public.
+5. [ ] Test on the actual Android device and record performance and usability observations.
+6. [ ] Iterate before adding religious content or social features.

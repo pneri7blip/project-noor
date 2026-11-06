@@ -42,6 +42,7 @@ The first prototype will focus on:
 - [Roadmap](docs/ROADMAP.md)
 - [3D Engine Decision](docs/ENGINE-DECISION.md)
 - [Technical Specification — Prototype 01](docs/TECHNICAL-SPEC-PROTOTYPE-01.md)
+- [Android Preview Workflow](docs/ANDROID-PREVIEW-WORKFLOW.md)
 
 ## Important religious boundary
 

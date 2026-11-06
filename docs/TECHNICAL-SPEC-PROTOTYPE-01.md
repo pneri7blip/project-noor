@@ -1,6 +1,6 @@
 # Technical Specification — Prototype 01
 
-**Status:** Proposed implementation specification  
+**Status:** Initial implementation added; build and device validation pending  
 **Stage:** Single-user Android-first 3D prototype  
 **Repository:** `pneri7blip/project-noor`  
 **Decision rule:** implement the smallest scene that can validate the Sansa-inspired mobile interaction model. Do not build multiplayer, accounts, or monetization in this prototype.
@@ -17,7 +17,7 @@ There must be no on-screen joystick.
 
 This prototype validates navigation, mobile performance, and atmosphere. It is not yet the complete Noor product.
 
-## 2. Proposed frontend stack
+## 2. Selected frontend stack
 
 | Layer | Proposed choice | Reason |
 |---|---|---|
@@ -27,7 +27,7 @@ This prototype validates navigation, mobile performance, and atmosphere. It is n
 | 3D asset format | glTF/GLB when real assets are introduced | Common web 3D interchange format |
 | Source control | Existing private GitHub repository | Version history and backup; not the development environment itself |
 
-**Important:** Three.js is a proposed choice for Noor, not a claim about Sansa's internal technology. Validate it on the target Android phone before treating the choice as final.
+**Decision:** Three.js is selected for the first prototype, not claimed to be Sansa's internal technology. The choice remains subject to real-device validation. See [ENGINE-DECISION.md](ENGINE-DECISION.md).
 
 ## 3. Explicitly deferred
 
@@ -126,7 +126,13 @@ Do not claim that a device passes performance acceptance until it has been teste
 - Respect reduced-motion preferences where practical.
 - Do not imply that entering the virtual mosque performs or replaces salah.
 
-## 9. Build sequence
+## 9. Initial implementation status
+
+The repository now contains an initial implementation in `src/main.ts`, `src/style.css`, `index.html`, and the Vite/TypeScript configuration. It includes a procedural courtyard blockout, a mosque-inspired landmark, garden placeholders, a simple temporary avatar, tap-to-move, one-finger camera orbit, pinch zoom, mouse fallback, and a reset-camera control.
+
+This is an unbuilt, unverified first code increment. No claim is made that it compiles, deploys, or works on the Motorola until those checks have actually been run. The avatar is a primitive placeholder, not a finished humanoid model.
+
+## 10. Build sequence
 
 Implement in small, testable increments:
 
@@ -140,7 +146,7 @@ Implement in small, testable increments:
 
 Each increment should be committed separately with a clear message and tested before adding the next one.
 
-## 10. Acceptance checklist
+## 11. Acceptance checklist
 
 Prototype 01 is ready for review when all are true:
 
@@ -157,7 +163,7 @@ Prototype 01 is ready for review when all are true:
 - [ ] Performance has been measured on the target phone and results recorded.
 - [ ] Empty-scene experience feels calm and coherent.
 
-## 11. Open decisions after Prototype 01
+## 12. Open decisions after Prototype 01
 
 Only after testing should we decide:
 
@@ -168,7 +174,7 @@ Only after testing should we decide:
 - When to add audio and the first spiritual interactions.
 - When to introduce a multiplayer server such as Colyseus.
 
-## 12. Development constraints
+## 13. Development constraints
 
 The project owner currently works from an Android phone and is a beginner in programming. The development workflow must therefore minimize local setup, terminal commands, and manual code editing. Prefer an AI-assisted workflow with small, reviewable changes and clear instructions for testing from the phone.
 

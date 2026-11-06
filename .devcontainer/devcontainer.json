@@ -1,0 +1,13 @@
+{
+  "name": "Project Noor",
+  "image": "mcr.microsoft.com/devcontainers/typescript-node:1-22-bookworm",
+  "postCreateCommand": "npm install",
+  "postStartCommand": "bash -lc 'if ! pgrep -f \"vite --host 0.0.0.0\" >/dev/null; then nohup npm run dev -- --host 0.0.0.0 >/tmp/project-noor-vite.log 2>&1 & fi'",
+  "forwardPorts": [5173],
+  "portsAttributes": {
+    "5173": {
+      "label": "Project Noor preview",
+      "onAutoForward": "openBrowser"
+    }
+  }
+}

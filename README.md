@@ -40,6 +40,8 @@ The first prototype will focus on:
 
 - [Product Requirements Document](docs/PRD.md)
 - [Roadmap](docs/ROADMAP.md)
+- [3D Engine Decision](docs/ENGINE-DECISION.md)
+- [Technical Specification — Prototype 01](docs/TECHNICAL-SPEC-PROTOTYPE-01.md)
 
 ## Important religious boundary
 
@@ -47,7 +49,8 @@ Project Noor is a digital environment for reflection and community. It does **no
 
 ## Current status
 
-**Stage:** concept and foundation  
-**Next step:** single-user 3D courtyard prototype, Android-first.
+**Stage:** first interactive prototype implemented in source; build and Android validation pending  
+**Stack:** Three.js + TypeScript + Vite  
+**Next step:** build, publish a private preview, and test controls on Android.
 
 This repository is an evolving product workspace. Scope and implementation choices may change after testing with real users.

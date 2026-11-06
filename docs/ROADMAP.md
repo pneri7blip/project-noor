@@ -20,11 +20,11 @@
 
 **Goal:** create the first meaningful experience, optimized for Android.
 
-- [ ] Build a lightweight browser-based 3D scene.
+- [x] Add the first lightweight browser-based 3D scene to the repository (build verification pending).
 - [ ] Create a peaceful courtyard and a mosque-inspired landmark.
 - [ ] Add a small garden, greenery, and restrained water/light details.
-- [ ] Implement simple touch movement and camera controls.
-- [ ] Add desktop controls for development and testing.
+- [x] Implement initial tap movement, camera orbit, and pinch zoom in source (device testing pending).
+- [x] Add initial mouse fallback and camera reset control in source.
 - [ ] Optimize loading, memory use, and frame rate.
 - [ ] Test on the target Android phone in a real mobile browser.
 
@@ -87,7 +87,7 @@ These features add cost and risk before the core experience has been validated.
 
 1. [x] Select Three.js + TypeScript + Vite for Prototype 01; see [engine decision](ENGINE-DECISION.md).
 2. [x] Add the first procedural courtyard, landmark, garden, placeholder avatar, and touch interaction implementation.
-3. [ ] Run a production build and resolve any compiler/runtime issues.
+3. [ ] Confirm the production build using the added GitHub Actions workflow and resolve any compiler/runtime issues.
 4. [ ] Publish a shareable HTTPS preview without making the private source repository public.
 5. [ ] Test on the actual Android device and record performance and usability observations.
 6. [ ] Iterate before adding religious content or social features.

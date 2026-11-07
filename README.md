@@ -50,8 +50,8 @@ Project Noor is a digital environment for reflection and community. It does **no
 
 ## Current status
 
-**Stage:** first interactive prototype implemented in source; build and Android validation pending  
+**Stage:** first interactive prototype running in GitHub Codespaces; initial Android interaction test completed. Visual quality, performance, and build validation are still in progress.  
 **Stack:** Three.js + TypeScript + Vite  
-**Next step:** build, publish a private preview, and test controls on Android.
+**Next step:** refine the 3D environment and avatar, then validate loading and performance on Android.
 
 This repository is an evolving product workspace. Scope and implementation choices may change after testing with real users.

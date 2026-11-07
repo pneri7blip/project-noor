@@ -115,6 +115,69 @@ for (const x of [-3.4, 3.4]) for (const z of [-1, 3]) {
   glow.position.set(x, 1.12, z); scene.add(glow);
 }
 
+// Courtyard paving: a quiet, repeating stone pattern around the central arrival path.
+const pavingMaterial = new THREE.MeshStandardMaterial({ color: 0xcfc3aa, roughness: 0.96 });
+const pavingAlt = new THREE.MeshStandardMaterial({ color: 0xbfb294, roughness: 0.98 });
+const pavingGeometry = new THREE.BoxGeometry(1.12, 0.035, 1.12);
+const paving = new THREE.InstancedMesh(pavingGeometry, pavingMaterial, 196);
+const pavingDummy = new THREE.Object3D();
+let pavingIndex = 0;
+for (let ix = -7; ix <= 7; ix++) {
+  for (let iz = -7; iz <= 7; iz++) {
+    const x = ix * 1.25;
+    const z = iz * 1.25;
+    // Keep the central walkway and the reflecting pool visually clear.
+    if (Math.abs(x) < 1.5 || (x > 3.8 && x < 10.2 && z > -2.5 && z < 0.5)) continue;
+    pavingDummy.position.set(x, 0.005, z);
+    pavingDummy.updateMatrix();
+    paving.setMatrixAt(pavingIndex, pavingDummy.matrix);
+    paving.setColorAt(pavingIndex, ((ix + iz) % 3 === 0) ? new THREE.Color(0xbfb294) : new THREE.Color(0xcfc3aa));
+    pavingIndex++;
+  }
+}
+paving.count = pavingIndex;
+paving.instanceMatrix.needsUpdate = true;
+scene.add(paving);
+
+// Low planted borders soften the stone courtyard without obstructing movement.
+const planterMaterial = new THREE.MeshStandardMaterial({ color: 0x88785d, roughness: 1 });
+const shrubMaterial = new THREE.MeshStandardMaterial({ color: 0x526b4d, roughness: 1 });
+for (const x of [-5.8, 5.8]) {
+  for (const z of [-4.5, 5.8]) {
+    const bed = new THREE.Mesh(new THREE.BoxGeometry(2.8, 0.28, 1.35), planterMaterial);
+    bed.position.set(x, 0.14, z);
+    scene.add(bed);
+    for (let n = 0; n < 5; n++) {
+      const shrub = new THREE.Mesh(new THREE.SphereGeometry(0.42, 9, 7), shrubMaterial);
+      shrub.scale.set(1.15, 0.72, 0.9);
+      shrub.position.set(x - 1.05 + n * 0.52, 0.48, z);
+      scene.add(shrub);
+    }
+  }
+}
+
+// A small, still-water fountain anchors the courtyard's quieter side.
+const fountainBase = new THREE.Mesh(new THREE.CylinderGeometry(1.05, 1.18, 0.22, 32), materials.trim);
+fountainBase.position.set(-7, 0.12, 5.2);
+scene.add(fountainBase);
+const fountainWater = new THREE.Mesh(new THREE.CylinderGeometry(0.88, 0.88, 0.08, 32), materials.water);
+fountainWater.position.set(-7, 0.27, 5.2);
+scene.add(fountainWater);
+const fountainStem = new THREE.Mesh(new THREE.CylinderGeometry(0.12, 0.18, 0.55, 12), materials.stone);
+fountainStem.position.set(-7, 0.55, 5.2);
+scene.add(fountainStem);
+const fountainBowl = new THREE.Mesh(new THREE.CylinderGeometry(0.48, 0.18, 0.16, 24), materials.trim);
+fountainBowl.position.set(-7, 0.88, 5.2);
+scene.add(fountainBowl);
+
+// Fine vertical accents give the entrance windows a crafted, screened appearance.
+for (const x of [-3.35, 3.35]) {
+  for (const offset of [-0.22, 0, 0.22]) {
+    box(0.035, 1.18, 0.035, materials.trim, x + offset, 2.25, -7.48);
+  }
+  box(0.72, 0.035, 0.035, materials.trim, x, 2.25, -7.47);
+}
+
 // First-pass human silhouette: robe, sleeves, hands, feet and simple kufi.
 const avatar = new THREE.Group();
 const robe = new THREE.Mesh(new THREE.CylinderGeometry(0.38, 0.5, 1.28, 16), materials.avatar);

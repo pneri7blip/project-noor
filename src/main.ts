@@ -117,7 +117,6 @@ for (const x of [-3.4, 3.4]) for (const z of [-1, 3]) {
 
 // Courtyard paving: a quiet, repeating stone pattern around the central arrival path.
 const pavingMaterial = new THREE.MeshStandardMaterial({ color: 0xcfc3aa, roughness: 0.96 });
-const pavingAlt = new THREE.MeshStandardMaterial({ color: 0xbfb294, roughness: 0.98 });
 const pavingGeometry = new THREE.BoxGeometry(1.12, 0.035, 1.12);
 const paving = new THREE.InstancedMesh(pavingGeometry, pavingMaterial, 196);
 const pavingDummy = new THREE.Object3D();
@@ -158,16 +157,16 @@ for (const x of [-5.8, 5.8]) {
 
 // A small, still-water fountain anchors the courtyard's quieter side.
 const fountainBase = new THREE.Mesh(new THREE.CylinderGeometry(1.05, 1.18, 0.22, 32), materials.trim);
-fountainBase.position.set(-7, 0.12, 5.2);
+fountainBase.position.set(-9, 0.12, 4.8);
 scene.add(fountainBase);
 const fountainWater = new THREE.Mesh(new THREE.CylinderGeometry(0.88, 0.88, 0.08, 32), materials.water);
-fountainWater.position.set(-7, 0.27, 5.2);
+fountainWater.position.set(-9, 0.27, 4.8);
 scene.add(fountainWater);
 const fountainStem = new THREE.Mesh(new THREE.CylinderGeometry(0.12, 0.18, 0.55, 12), materials.stone);
-fountainStem.position.set(-7, 0.55, 5.2);
+fountainStem.position.set(-9, 0.55, 4.8);
 scene.add(fountainStem);
 const fountainBowl = new THREE.Mesh(new THREE.CylinderGeometry(0.48, 0.18, 0.16, 24), materials.trim);
-fountainBowl.position.set(-7, 0.88, 5.2);
+fountainBowl.position.set(-9, 0.88, 4.8);
 scene.add(fountainBowl);
 
 // Fine vertical accents give the entrance windows a crafted, screened appearance.

@@ -1,26 +1,33 @@
 # Android Development and Preview Workflow
 
-**Purpose:** run and preview the existing Project Noor codebase from an Android phone without a local computer.
+**Purpose:** run and preview Project Noor from an Android phone without a local computer.
 
-## Recommended first route: Replit cloud workspace
+## Recommended route: GitHub Codespaces
 
-Replit documents a workflow for opening an existing GitHub repository in a cloud sandbox and running it with Agent. Its mobile app is designed for building and previewing web apps from a phone.
+GitHub Codespaces is the development workspace for this repository. Replit is **not required** and must not be used as part of the current workflow.
 
-This is a development/preview route, not a replacement for the private GitHub repository.
+### Open the project
 
-### One-time setup (account authorization required)
+1. Open the private repository: https://github.com/pneri7blip/project-noor
+2. Select **Code → Codespaces**.
+3. Open the existing Codespace for the `main` branch. Create one only if none exists.
+4. Wait for the editor to finish loading.
 
-1. Install/open the official Replit app on Android or visit https://replit.com/mobile.
-2. Sign in to Replit.
-3. In Replit, open **Repos** and connect the GitHub account that can read the private repository.
-4. Select the existing repository: https://github.com/pneri7blip/project-noor
-5. Ask Replit Agent to **run the existing repository in a cloud sandbox only**. Do not ask it to create a replacement project or modify source files.
+### Start the preview
 
-Suggested instruction:
+Open the integrated terminal and run:
 
-> Run this existing repository in a Replit cloud sandbox so I can preview it on my Android phone. Repository: https://github.com/pneri7blip/project-noor. Do not create a new app, do not replace the project, and do not edit or commit any source files. Install dependencies and run the existing Vite app. Tell me the preview URL and any build/runtime errors.
+```bash
+npm run dev -- --host 0.0.0.0
+```
 
-6. Open the preview URL on the phone and test the courtyard.
+Vite serves the app on port **5173**. Codespaces normally detects and forwards this port. Open the forwarded port in the browser to view the prototype.
+
+If the **Ports** panel is not visible in the mobile layout:
+- Open the Codespaces menu and choose **View → Open View…**, then search for **Ports**; or
+- Use the preview/browser link that Codespaces displays when it detects port 5173.
+
+The Ports panel is a convenience, not a requirement once the preview is already open in the phone browser. Keep the Codespace running while testing.
 
 ### What to test
 
@@ -32,23 +39,17 @@ Suggested instruction:
 - Rotate the phone between portrait and landscape.
 - Try the Reset view control.
 
-The current avatar and environment are blockout placeholders. Visual polish is not the acceptance test yet; interaction and reliable loading come first.
+The current avatar and environment are early blockout placeholders. Visual polish is still in progress.
 
 ## Source-of-truth rule
 
-GitHub remains the canonical source repository. Do not accept unreviewed Agent rewrites or a second, disconnected Noor project. If Replit proposes code changes, stop before accepting them and review the proposed diff first.
+GitHub remains the canonical source repository. Do not create a second, disconnected Noor project or accept unreviewed AI rewrites. Changes made directly to GitHub may need to be pulled into an already-open Codespace before they appear there.
 
-## Alternative deployment route
+## Future preview hosting
 
-Cloudflare Pages supports Git-based deployments from GitHub and creates preview deployments for commits and branches. It is a good candidate for a stable shareable HTTPS preview after the first build is verified. Connecting Cloudflare to the private GitHub repository requires the owner's explicit account authorization and repository access grant; this setup has not been performed.
+A stable shareable HTTPS preview can be considered after the build is verified. Any hosting connection that needs access to the private GitHub repository requires the owner's explicit authorization.
 
 ## Current limitation
 
-The first prototype source has been committed, and a GitHub Actions build workflow has been added. The build has not yet been independently confirmed as successful. Do not treat a saved source file or a queued workflow as proof that the app compiles or runs on the target phone.
+A working preview has been opened on the target Android phone, but the production build and mobile performance have not yet been independently verified. Do not treat a saved source file or a queued workflow as proof that the app compiles or performs well.
 
-## Official references
-
-- Replit mobile: https://replit.com/products/mobile
-- Replit: run an existing repository: https://replit.com/help/answers/how-do-i-get-my-existing-repository-running-in-replit
-- Replit: troubleshooting repository selection: https://replit.com/help/answers/why-cant-agent-find-my-repository-or-why-does-it-create-a-new-app
-- Cloudflare Pages Git integration: https://developers.cloudflare.com/pages/configuration/git-integration/

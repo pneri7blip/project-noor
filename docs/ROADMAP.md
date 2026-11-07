@@ -10,7 +10,7 @@
 - [x] Create the private GitHub repository for documentation and version history.
 - [x] Draft the initial product vision and principles.
 - [x] Define the first prototype scope.
-- [ ] Build the initial Three.js + TypeScript + Vite prototype and validate it on the target Android phone.
+- [x] Build and open the initial Three.js + TypeScript + Vite prototype on the target Android phone.
 - [ ] Define the Android test-device and browser baseline.
 - [ ] Establish an initial visual direction.
 
@@ -21,12 +21,12 @@
 **Goal:** create the first meaningful experience, optimized for Android.
 
 - [x] Add the first lightweight browser-based 3D scene to the repository (build verification pending).
-- [ ] Create a peaceful courtyard and a mosque-inspired landmark.
-- [ ] Add a small garden, greenery, and restrained water/light details.
-- [x] Implement initial tap movement, camera orbit, and pinch zoom in source (device testing pending).
+- [ ] Refine the peaceful courtyard and mosque-inspired landmark beyond the current geometric blockout.
+- [ ] Improve the garden, greenery, water, and lighting; current elements are placeholders.
+- [x] Implement and test initial tap movement, camera orbit, and pinch zoom on Android.
 - [x] Add initial mouse fallback and camera reset control in source.
 - [ ] Optimize loading, memory use, and frame rate.
-- [ ] Test on the target Android phone in a real mobile browser.
+- [x] Open the prototype in a real mobile browser on the target Android phone; detailed performance testing remains pending.
 
 **Exit criteria:**
 - A visitor can open the experience and move around without an account.

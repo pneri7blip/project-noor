@@ -428,13 +428,19 @@ function updateCamera(dt: number) {
   lookTarget.set(avatar.position.x, avatar.position.y + 1.05, avatar.position.z);
   camera.lookAt(lookTarget);
 }
+const movementPlane = new THREE.Plane(new THREE.Vector3(0, 1, 0), 0);
+const movementPoint = new THREE.Vector3();
+
 function screenRay(x: number, y: number) {
   const rect = renderer.domElement.getBoundingClientRect();
   pointer.set((x - rect.left) / rect.width * 2 - 1, -((y - rect.top) / rect.height) * 2 + 1);
   raycaster.setFromCamera(pointer, camera);
-  const hit = raycaster.intersectObject(ground, false)[0];
+
+  // Intersect an infinite mathematical floor, not the finite decorative ground mesh.
+  // This keeps taps near the screen edges valid on phones too.
+  const hit = raycaster.ray.intersectPlane(movementPlane, movementPoint);
   if (hit) {
-    target.copy(hit.point);
+    target.copy(hit);
     target.x = THREE.MathUtils.clamp(target.x, -14.5, 14.5);
     target.z = THREE.MathUtils.clamp(target.z, -14.5, 14.5);
     destinationMarker.position.set(target.x, 0.035, target.z);
@@ -466,7 +472,7 @@ renderer.domElement.addEventListener('pointermove', (event) => {
   } else if (pointers.size === 1 && dragging) {
     // Ignore small finger jitter so an ordinary Android tap remains a movement command.
     // A deliberate drag still rotates the camera.
-    if (Math.hypot(event.clientX - gestureStart.x, event.clientY - gestureStart.y) > 12) gestureMoved = true;
+    if (Math.hypot(event.clientX - gestureStart.x, event.clientY - gestureStart.y) > 18) gestureMoved = true;
     if (gestureMoved) {
       angle -= dx * 0.006;
       cameraHeight = THREE.MathUtils.clamp(cameraHeight + dy * 0.008, 2.8, 7);

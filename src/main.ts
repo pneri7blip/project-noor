@@ -236,7 +236,7 @@ hallTiles.count = hallTileIndex;
 hallTiles.instanceMatrix.needsUpdate = true;
 scene.add(hallTiles);
 
-const carpet = new THREE.Mesh(new THREE.PlaneGeometry(5.2, 22), new THREE.MeshStandardMaterial({ color: 0x31534d, roughness: 1 }));
+const carpet = new THREE.Mesh(new THREE.PlaneGeometry(5.2, 22), new THREE.MeshStandardMaterial({ color: 0xffffff, map: makeCarpetTexture(), roughness: 0.96 }));
 carpet.rotation.x = -Math.PI / 2;
 carpet.position.set(0, 0.025, -27.4);
 scene.add(carpet);
@@ -331,6 +331,112 @@ for (const z of [-21.5, -27.2, -33.0]) {
   ceilingLight.position.set(0, 8.08, z);
   scene.add(ceilingLight);
 }
+
+
+// NOOR MATERIAL PASS — procedural, GPU-friendly surface detail.
+// Canvas textures are generated once, reused, and kept deliberately modest for mobile.
+function makeMarbleTexture() {
+  const canvas = document.createElement('canvas');
+  canvas.width = 512; canvas.height = 512;
+  const ctx = canvas.getContext('2d')!;
+  ctx.fillStyle = '#e8e0d2'; ctx.fillRect(0, 0, 512, 512);
+  for (let i = 0; i < 34; i++) {
+    const x = (i * 83) % 512, y = (i * 137) % 512;
+    ctx.beginPath(); ctx.moveTo(x - 120, y - 70);
+    ctx.bezierCurveTo(x - 30, y - 30, x + 20, y + 35, x + 150, y + 90);
+    ctx.strokeStyle = i % 3 === 0 ? 'rgba(157,139,111,0.18)' : 'rgba(255,255,255,0.32)';
+    ctx.lineWidth = i % 4 === 0 ? 2.2 : 1; ctx.stroke();
+  }
+  const texture = new THREE.CanvasTexture(canvas);
+  texture.colorSpace = THREE.SRGBColorSpace;
+  texture.wrapS = texture.wrapT = THREE.RepeatWrapping;
+  texture.repeat.set(2, 3);
+  return texture;
+}
+function makeCarpetTexture() {
+  const canvas = document.createElement('canvas');
+  canvas.width = 512; canvas.height = 512;
+  const ctx = canvas.getContext('2d')!;
+  ctx.fillStyle = '#173e38'; ctx.fillRect(0, 0, 512, 512);
+  ctx.strokeStyle = '#c9a66a'; ctx.lineWidth = 5;
+  ctx.strokeRect(17, 17, 478, 478); ctx.strokeRect(31, 31, 450, 450);
+  ctx.strokeStyle = 'rgba(226,194,132,0.8)'; ctx.lineWidth = 2;
+  for (let y = 52; y < 480; y += 32) for (let x = 52; x < 480; x += 32) {
+    ctx.save(); ctx.translate(x, y); ctx.rotate(Math.PI / 4);
+    ctx.strokeRect(-8, -8, 16, 16);
+    ctx.beginPath(); ctx.moveTo(-15, 0); ctx.lineTo(15, 0); ctx.moveTo(0, -15); ctx.lineTo(0, 15); ctx.stroke();
+    ctx.restore();
+  }
+  const texture = new THREE.CanvasTexture(canvas);
+  texture.colorSpace = THREE.SRGBColorSpace;
+  texture.wrapS = texture.wrapT = THREE.RepeatWrapping;
+  texture.repeat.set(1, 2);
+  return texture;
+}
+const marbleMap = makeMarbleTexture();
+hallIvory.map = marbleMap;
+hallIvory.needsUpdate = true;
+hallTile.map = marbleMap;
+hallTile.needsUpdate = true;
+
+
+// Decorative wall panels: repeated eight-point geometry, instanced to keep draw calls low.
+const motifGeometry = new THREE.BufferGeometry();
+const motifVertices: number[] = [];
+for (let i = 0; i < 8; i++) {
+  const a = (i / 8) * Math.PI * 2, b = ((i + 1) / 8) * Math.PI * 2;
+  motifVertices.push(0, 0, 0, Math.cos(a) * 0.42, Math.sin(a) * 0.42, 0, Math.cos(b) * 0.42, Math.sin(b) * 0.42, 0);
+}
+motifGeometry.setAttribute('position', new THREE.Float32BufferAttribute(motifVertices, 3));
+motifGeometry.computeVertexNormals();
+const motifMaterial = new THREE.MeshStandardMaterial({ color: 0xc4a36a, metalness: 0.38, roughness: 0.52, side: THREE.DoubleSide });
+const wallMotifs = new THREE.InstancedMesh(motifGeometry, motifMaterial, 48);
+const motifDummy = new THREE.Object3D();
+let motifIndex = 0;
+for (const side of [-1, 1]) for (const z of [-22.0, -25.0, -28.0, -31.0, -34.0, -37.0]) {
+  for (const y of [2.0, 4.25, 6.5]) {
+    if (motifIndex >= 48) break;
+    motifDummy.position.set(side * 9.79, y, z);
+    motifDummy.rotation.y = side < 0 ? Math.PI / 2 : -Math.PI / 2;
+    motifDummy.scale.setScalar(0.78);
+    motifDummy.updateMatrix(); wallMotifs.setMatrixAt(motifIndex++, motifDummy.matrix);
+  }
+}
+wallMotifs.count = motifIndex;
+wallMotifs.instanceMatrix.needsUpdate = true;
+scene.add(wallMotifs);
+
+// A central brass chandelier silhouette and hanging lanterns add a human scale to the vault.
+const chandelier = new THREE.Group();
+const chain = new THREE.Mesh(new THREE.CylinderGeometry(0.025, 0.025, 1.0, 8), hallGold);
+chain.position.y = 7.35; chandelier.add(chain);
+const ring = new THREE.Mesh(new THREE.TorusGeometry(1.18, 0.055, 8, 48), hallGold);
+ring.rotation.x = Math.PI / 2; ring.position.y = 6.72; chandelier.add(ring);
+for (let i = 0; i < 12; i++) {
+  const a = (i / 12) * Math.PI * 2;
+  const arm = new THREE.Mesh(new THREE.CylinderGeometry(0.025, 0.035, 0.92, 8), hallGold);
+  arm.position.set(Math.cos(a) * 0.9, 6.72, Math.sin(a) * 0.9);
+  arm.rotation.z = Math.cos(a) * 0.72;
+  arm.rotation.x = Math.sin(a) * 0.72;
+  chandelier.add(arm);
+  const lamp = new THREE.Mesh(new THREE.OctahedronGeometry(0.16, 1), hallGlow);
+  lamp.position.set(Math.cos(a) * 1.18, 6.58, Math.sin(a) * 1.18);
+  chandelier.add(lamp);
+}
+chandelier.position.set(0, 0, -27.2);
+scene.add(chandelier);
+
+// Fine gold inlay around the mihrab, plus a raised central niche medallion.
+for (const width of [5.05, 4.72]) {
+  const inlay = new THREE.Mesh(new THREE.TorusGeometry(width / 2, 0.035, 8, 64, Math.PI), hallGold);
+  inlay.position.set(0, 3.2, -39.0);
+  inlay.scale.y = 1.3;
+  scene.add(inlay);
+}
+const mihrabMedallion = new THREE.Mesh(new THREE.OctahedronGeometry(0.38, 1), hallGold);
+mihrabMedallion.position.set(0, 5.85, -39.0);
+mihrabMedallion.scale.set(1, 1.25, 0.22);
+scene.add(mihrabMedallion);
 
 // A simple patterned border at the entrance makes the transition from courtyard to hall legible.
 for (const x of [-4.3, 4.3]) {

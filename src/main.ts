@@ -250,7 +250,7 @@ for (const x of [-2.48, 2.48]) {
 box(0.55, 8.6, 25, hallStone, -10.1, 4.3, -27.3);
 box(0.55, 8.6, 25, hallStone, 10.1, 4.3, -27.3);
 box(20.2, 8.6, 0.55, hallStone, 0, 4.3, -39.7);
-box(20.2, 0.45, 25.2, hallGold, 0, 8.55, -27.3);
+box(20.2, 0.45, 25.2, hallIvory, 0, 8.55, -27.3);
 
 // Repeated pointed arches and paired columns create depth without expensive real-time lighting.
 function pointedArch(x: number, z: number, width: number, height: number, material: THREE.Material, depth = 0.1) {
@@ -289,13 +289,13 @@ for (const z of [-20.5, -26.2, -31.9, -37.1]) {
 // Cross-vault ribs overhead give the hall a monumental rhythm.
 for (const z of [-19.1, -24.4, -29.7, -35.0]) {
   const vault = new THREE.CatmullRomCurve3([
-    new THREE.Vector3(-9.65, 8.15, z),
-    new THREE.Vector3(-7.2, 9.0, z),
-    new THREE.Vector3(-4.6, 10.15, z),
-    new THREE.Vector3(0, 10.65, z),
-    new THREE.Vector3(4.6, 10.15, z),
-    new THREE.Vector3(7.2, 9.0, z),
-    new THREE.Vector3(9.65, 8.15, z),
+    new THREE.Vector3(-9.65, 7.55, z),
+    new THREE.Vector3(-7.2, 7.85, z),
+    new THREE.Vector3(-4.6, 8.12, z),
+    new THREE.Vector3(0, 8.25, z),
+    new THREE.Vector3(4.6, 8.12, z),
+    new THREE.Vector3(7.2, 7.85, z),
+    new THREE.Vector3(9.65, 7.55, z),
   ]);
   scene.add(new THREE.Mesh(new THREE.TubeGeometry(vault, 48, 0.16, 8, false), hallGold));
 }

@@ -5,6 +5,9 @@ const app = document.querySelector<HTMLDivElement>('#app')!;
 const loading = document.querySelector<HTMLDivElement>('#loading')!;
 const hint = document.querySelector<HTMLDivElement>('#hint')!;
 const resetButton = document.querySelector<HTMLButtonElement>('#reset-camera')!;
+const greetButton = document.querySelector<HTMLButtonElement>('#greet-action')!;
+const pauseButton = document.querySelector<HTMLButtonElement>('#pause-action')!;
+const presenceNote = document.querySelector<HTMLDivElement>('#presence-note')!;
 
 const scene = new THREE.Scene();
 scene.background = new THREE.Color(0xd9d1bd);
@@ -264,6 +267,9 @@ destinationMarker.visible = false;
 scene.add(destinationMarker);
 let walkBlend = 0;
 let walkPhase = 0;
+let gesture: 'none' | 'greet' = 'none';
+let gestureStarted = 0;
+let paused = false;
 let angle = 0;
 let distance = 8.5;
 let cameraHeight = 4.2;
@@ -345,6 +351,24 @@ renderer.domElement.addEventListener('wheel', (event) => {
   distance = THREE.MathUtils.clamp(distance + event.deltaY * 0.008, 5.5, 15);
 }, { passive: true });
 resetButton.addEventListener('click', () => { angle = 0; distance = 8.5; cameraHeight = 4.2; });
+greetButton.addEventListener('click', () => {
+  gesture = 'greet';
+  gestureStarted = clock.elapsedTime;
+  paused = false;
+  pauseButton.setAttribute('aria-pressed', 'false');
+  presenceNote.textContent = 'Un saluto discreto, nel rispetto della quiete.';
+});
+pauseButton.addEventListener('click', () => {
+  paused = !paused;
+  pauseButton.setAttribute('aria-pressed', String(paused));
+  if (paused) {
+    target.copy(avatar.position);
+    gesture = 'none';
+    presenceNote.textContent = 'Puoi restare qui quanto desideri.';
+  } else {
+    presenceNote.textContent = 'Tocca il cortile per scegliere dove andare.';
+  }
+});
 
 function resize() {
   const width = app.clientWidth;
@@ -362,7 +386,7 @@ function animate() {
   const delta = new THREE.Vector3().subVectors(target, avatar.position);
   delta.y = 0;
   const length = delta.length();
-  const moving = length > 0.075;
+  const moving = length > 0.075 && !paused;
 
   if (moving) {
     const desiredYaw = Math.atan2(delta.x, delta.z);
@@ -385,6 +409,13 @@ function animate() {
   armPivots[1].rotation.x = stride * 0.62;
   armPivots[0].rotation.z = -0.045 - walkBlend * 0.025;
   armPivots[1].rotation.z = 0.045 + walkBlend * 0.025;
+
+  // A brief hand-to-chest greeting, inspired by Sansa's simple social gestures.
+  const greetElapsed = elapsed - gestureStarted;
+  const greetEnvelope = gesture === 'greet' ? Math.sin(Math.min(1, greetElapsed / 1.25) * Math.PI) : 0;
+  armPivots[1].rotation.z += -0.95 * greetEnvelope;
+  armPivots[1].rotation.x += -0.22 * greetEnvelope;
+  if (gesture === 'greet' && greetElapsed > 1.25) gesture = 'none';
 
   // A restrained idle breath keeps the character from looking frozen.
   const breathing = Math.sin(elapsed * 1.7) * 0.006 * (1 - walkBlend);

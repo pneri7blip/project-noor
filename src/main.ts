@@ -8,6 +8,8 @@ const resetButton = document.querySelector<HTMLButtonElement>('#reset-camera')!;
 const greetButton = document.querySelector<HTMLButtonElement>('#greet-action')!;
 const pauseButton = document.querySelector<HTMLButtonElement>('#pause-action')!;
 const presenceNote = document.querySelector<HTMLDivElement>('#presence-note')!;
+const touchDebug = document.querySelector<HTMLDivElement>('#touch-debug')!;
+function showTouchDebug(message: string) { touchDebug.textContent = message; }
 
 const scene = new THREE.Scene();
 scene.background = new THREE.Color(0xc9c4b4);
@@ -445,6 +447,9 @@ function screenRay(x: number, y: number) {
     target.z = THREE.MathUtils.clamp(target.z, -14.5, 14.5);
     destinationMarker.position.set(target.x, 0.035, target.z);
     destinationMarker.visible = true;
+    showTouchDebug(`RAY OK · destinazione ${target.x.toFixed(1)}, ${target.z.toFixed(1)}`);
+  } else {
+    showTouchDebug('RAY NO · tocco ricevuto, piano non intercettato');
   }
 }
 function gap() {
@@ -452,6 +457,8 @@ function gap() {
   return pts.length < 2 ? 0 : Math.hypot(pts[0].x - pts[1].x, pts[0].y - pts[1].y);
 }
 renderer.domElement.addEventListener('pointerdown', (event) => {
+  suppressNextClick = false;
+  showTouchDebug(`DOWN · ${event.pointerType} · ${Math.round(event.clientX)},${Math.round(event.clientY)}`);
   renderer.domElement.setPointerCapture(event.pointerId);
   pointers.set(event.pointerId, { x: event.clientX, y: event.clientY });
   gestureStart = { x: event.clientX, y: event.clientY };
@@ -474,6 +481,7 @@ renderer.domElement.addEventListener('pointermove', (event) => {
     // A deliberate drag still rotates the camera.
     if (Math.hypot(event.clientX - gestureStart.x, event.clientY - gestureStart.y) > 18) gestureMoved = true;
     if (gestureMoved) {
+      showTouchDebug('MOVE · trascinamento camera');
       angle -= dx * 0.006;
       cameraHeight = THREE.MathUtils.clamp(cameraHeight + dy * 0.008, 2.8, 7);
     }
@@ -484,7 +492,12 @@ function endPointer(event: PointerEvent) {
   if (!pointers.has(event.pointerId)) return;
   // Let the browser's click event handle taps. Pointer events are reserved for
   // camera gestures, avoiding missed taps on Android touchscreens.
-  if (event.type === 'pointerup') suppressNextClick = gestureMoved;
+  if (event.type === 'pointerup') {
+    suppressNextClick = gestureMoved;
+    showTouchDebug(gestureMoved ? 'UP · gesto interpretato come trascinamento' : 'UP · tocco breve, attendo CLICK');
+  } else {
+    showTouchDebug('CANCEL · gesto annullato dal browser');
+  }
   pointers.delete(event.pointerId);
   if (pointers.size === 0) { dragging = false; pinchStart = 0; }
   if (pointers.size === 1) { dragging = false; }
@@ -494,8 +507,10 @@ renderer.domElement.addEventListener('pointercancel', endPointer);
 renderer.domElement.addEventListener('click', (event) => {
   if (suppressNextClick) {
     suppressNextClick = false;
+    showTouchDebug('CLICK IGNORATO · il browser lo ha associato a un trascinamento');
     return;
   }
+  showTouchDebug('CLICK · clic singolo ricevuto');
   screenRay(event.clientX, event.clientY);
 });
 renderer.domElement.addEventListener('wheel', (event) => {

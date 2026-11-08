@@ -1,16 +1,22 @@
 <!doctype html>
-<html lang="en">
+<html lang="it">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
     <meta name="theme-color" content="#d9d1bd" />
-    <meta name="description" content="Project Noor — a quiet digital courtyard." />
-    <title>Project Noor</title>
+    <meta name="description" content="Noor — uno spazio digitale di quiete e presenza." />
+    <title>Noor — Uno spazio di quiete</title>
   </head>
   <body>
     <main id="app" aria-label="Project Noor virtual courtyard">
       <div id="loading">Preparing the courtyard…</div>
-      <div id="hint">Tap to move · Drag to look · Pinch to zoom</div>
+      <div id="brand"><span class="brand-mark">ن</span><span><strong>NOOR</strong><small>IL CORTILE</small></span></div>
+      <div id="hint">Tocca per muoverti · Trascina per guardarti intorno · Pizzica per zoomare</div>
+      <div id="action-bar" role="group" aria-label="Azioni dell’avatar">
+        <button class="action-button" id="greet-action" type="button" aria-label="Saluta"> <span class="action-icon">✋</span><span>Saluta</span></button>
+        <button class="action-button" id="pause-action" type="button" aria-label="Fermati e fai una pausa"><span class="action-icon">◌</span><span>Sosta</span></button>
+      </div>
+      <div id="presence-note" aria-live="polite">Uno spazio tranquillo, senza chat né classifiche.</div>
       <button id="reset-camera" type="button" aria-label="Reset camera">Reset view</button>
     </main>
     <script type="module" src="/src/main.ts"></script>

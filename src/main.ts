@@ -479,16 +479,25 @@ renderer.domElement.addEventListener('pointermove', (event) => {
     }
   }
 });
+let suppressNextClick = false;
 function endPointer(event: PointerEvent) {
   if (!pointers.has(event.pointerId)) return;
-  if (pointers.size === 1 && !gestureMoved && !event.pointerType.match(/mouse/)) screenRay(event.clientX, event.clientY);
-  if (pointers.size === 1 && !gestureMoved && event.pointerType === 'mouse' && event.button === 0) screenRay(event.clientX, event.clientY);
+  // Let the browser's click event handle taps. Pointer events are reserved for
+  // camera gestures, avoiding missed taps on Android touchscreens.
+  if (event.type === 'pointerup') suppressNextClick = gestureMoved;
   pointers.delete(event.pointerId);
   if (pointers.size === 0) { dragging = false; pinchStart = 0; }
   if (pointers.size === 1) { dragging = false; }
 }
 renderer.domElement.addEventListener('pointerup', endPointer);
 renderer.domElement.addEventListener('pointercancel', endPointer);
+renderer.domElement.addEventListener('click', (event) => {
+  if (suppressNextClick) {
+    suppressNextClick = false;
+    return;
+  }
+  screenRay(event.clientX, event.clientY);
+});
 renderer.domElement.addEventListener('wheel', (event) => {
   distance = THREE.MathUtils.clamp(distance + event.deltaY * 0.008, 5.5, 15);
 }, { passive: true });

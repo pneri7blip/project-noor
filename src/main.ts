@@ -8,8 +8,6 @@ const resetButton = document.querySelector<HTMLButtonElement>('#reset-camera')!;
 const greetButton = document.querySelector<HTMLButtonElement>('#greet-action')!;
 const pauseButton = document.querySelector<HTMLButtonElement>('#pause-action')!;
 const presenceNote = document.querySelector<HTMLDivElement>('#presence-note')!;
-const touchDebug = document.querySelector<HTMLDivElement>('#touch-debug')!;
-function showTouchDebug(message: string) { touchDebug.textContent = message; }
 
 const scene = new THREE.Scene();
 scene.background = new THREE.Color(0xc9c4b4);
@@ -392,15 +390,6 @@ for (const side of [-1, 1]) {
 avatar.position.set(0, 0, 5);
 scene.add(avatar);
 
-const target = new THREE.Vector3(0, 0, 5);
-const destinationMarker = new THREE.Mesh(
-  new THREE.TorusGeometry(0.34, 0.025, 8, 32),
-  new THREE.MeshBasicMaterial({ color: 0xf0d49b, transparent: true, opacity: 0.85 }),
-);
-destinationMarker.rotation.x = -Math.PI / 2;
-destinationMarker.position.set(0, 0.035, 5);
-destinationMarker.visible = false;
-scene.add(destinationMarker);
 let walkBlend = 0;
 let walkPhase = 0;
 let gesture: 'none' | 'greet' = 'none';
@@ -410,14 +399,16 @@ let angle = 0;
 let distance = 8.5;
 let cameraHeight = 4.2;
 const lookTarget = new THREE.Vector3();
-const raycaster = new THREE.Raycaster();
-const pointer = new THREE.Vector2();
 const pointers = new Map<number, { x: number; y: number }>();
+const steeringDirection = new THREE.Vector3();
+let steeringActive = false;
 let gestureStart = { x: 0, y: 0 };
-let gestureMoved = false;
 let pinchStart = 0;
 let pinchDistance = 0;
-let dragging = false;
+let lastTwoFingerCenter = { x: 0, y: 0 };
+const cameraForward = new THREE.Vector3();
+const cameraRight = new THREE.Vector3();
+const worldUp = new THREE.Vector3(0, 1, 0);
 const clock = new THREE.Clock();
 
 function updateCamera(dt: number) {
@@ -430,89 +421,68 @@ function updateCamera(dt: number) {
   lookTarget.set(avatar.position.x, avatar.position.y + 1.05, avatar.position.z);
   camera.lookAt(lookTarget);
 }
-const movementPlane = new THREE.Plane(new THREE.Vector3(0, 1, 0), 0);
-const movementPoint = new THREE.Vector3();
-
-function screenRay(x: number, y: number) {
-  const rect = renderer.domElement.getBoundingClientRect();
-  pointer.set((x - rect.left) / rect.width * 2 - 1, -((y - rect.top) / rect.height) * 2 + 1);
-  raycaster.setFromCamera(pointer, camera);
-
-  // Intersect an infinite mathematical floor, not the finite decorative ground mesh.
-  // This keeps taps near the screen edges valid on phones too.
-  const hit = raycaster.ray.intersectPlane(movementPlane, movementPoint);
-  if (hit) {
-    target.copy(hit);
-    target.x = THREE.MathUtils.clamp(target.x, -14.5, 14.5);
-    target.z = THREE.MathUtils.clamp(target.z, -14.5, 14.5);
-    destinationMarker.position.set(target.x, 0.035, target.z);
-    destinationMarker.visible = true;
-    showTouchDebug(`RAY OK · destinazione ${target.x.toFixed(1)}, ${target.z.toFixed(1)}`);
-  } else {
-    showTouchDebug('RAY NO · tocco ricevuto, piano non intercettato');
-  }
-}
 function gap() {
   const pts = [...pointers.values()];
   return pts.length < 2 ? 0 : Math.hypot(pts[0].x - pts[1].x, pts[0].y - pts[1].y);
 }
+function center() {
+  const pts = [...pointers.values()];
+  return { x: (pts[0].x + pts[1].x) / 2, y: (pts[0].y + pts[1].y) / 2 };
+}
 renderer.domElement.addEventListener('pointerdown', (event) => {
-  suppressNextClick = false;
-  showTouchDebug(`DOWN · ${event.pointerType} · ${Math.round(event.clientX)},${Math.round(event.clientY)}`);
   renderer.domElement.setPointerCapture(event.pointerId);
   pointers.set(event.pointerId, { x: event.clientX, y: event.clientY });
-  gestureStart = { x: event.clientX, y: event.clientY };
-  gestureMoved = false;
-  if (pointers.size === 1) dragging = true;
-  if (pointers.size === 2) { dragging = false; pinchStart = gap(); pinchDistance = distance; }
+  if (pointers.size === 1) {
+    gestureStart = { x: event.clientX, y: event.clientY };
+    steeringActive = false;
+  } else if (pointers.size === 2) {
+    steeringActive = false;
+    pinchStart = gap();
+    pinchDistance = distance;
+    lastTwoFingerCenter = center();
+  }
 });
 renderer.domElement.addEventListener('pointermove', (event) => {
   if (!pointers.has(event.pointerId)) return;
-  const previous = pointers.get(event.pointerId)!;
-  const dx = event.clientX - previous.x;
-  const dy = event.clientY - previous.y;
   pointers.set(event.pointerId, { x: event.clientX, y: event.clientY });
-  if (pointers.size === 2) {
+  if (pointers.size === 1) {
+    const steerX = event.clientX - gestureStart.x;
+    const steerY = event.clientY - gestureStart.y;
+    if (Math.hypot(steerX, steerY) > 12) {
+      camera.getWorldDirection(cameraForward);
+      cameraForward.y = 0;
+      cameraForward.normalize();
+      cameraRight.crossVectors(cameraForward, worldUp).normalize();
+      steeringDirection.copy(cameraRight).multiplyScalar(steerX)
+        .addScaledVector(cameraForward, -steerY).normalize();
+      steeringActive = true;
+    } else {
+      steeringActive = false;
+    }
+  } else if (pointers.size === 2) {
     const currentGap = gap();
     if (pinchStart > 0) distance = THREE.MathUtils.clamp(pinchDistance * pinchStart / Math.max(1, currentGap), 5.5, 15);
-    gestureMoved = true;
-  } else if (pointers.size === 1 && dragging) {
-    // Ignore small finger jitter so an ordinary Android tap remains a movement command.
-    // A deliberate drag still rotates the camera.
-    if (Math.hypot(event.clientX - gestureStart.x, event.clientY - gestureStart.y) > 18) gestureMoved = true;
-    if (gestureMoved) {
-      showTouchDebug('MOVE · trascinamento camera');
-      angle -= dx * 0.006;
-      cameraHeight = THREE.MathUtils.clamp(cameraHeight + dy * 0.008, 2.8, 7);
-    }
+    const currentCenter = center();
+    angle -= (currentCenter.x - lastTwoFingerCenter.x) * 0.006;
+    cameraHeight = THREE.MathUtils.clamp(cameraHeight + (currentCenter.y - lastTwoFingerCenter.y) * 0.008, 2.8, 7);
+    lastTwoFingerCenter = currentCenter;
   }
 });
-let suppressNextClick = false;
 function endPointer(event: PointerEvent) {
   if (!pointers.has(event.pointerId)) return;
-  // Let the browser's click event handle taps. Pointer events are reserved for
-  // camera gestures, avoiding missed taps on Android touchscreens.
-  if (event.type === 'pointerup') {
-    suppressNextClick = gestureMoved;
-    showTouchDebug(gestureMoved ? 'UP · gesto interpretato come trascinamento' : 'UP · tocco breve, attendo CLICK');
-  } else {
-    showTouchDebug('CANCEL · gesto annullato dal browser');
-  }
   pointers.delete(event.pointerId);
-  if (pointers.size === 0) { dragging = false; pinchStart = 0; }
-  if (pointers.size === 1) { dragging = false; }
+  if (pointers.size === 0) {
+    steeringActive = false;
+    steeringDirection.set(0, 0, 0);
+    pinchStart = 0;
+  } else if (pointers.size === 1) {
+    gestureStart = { ...[...pointers.values()][0] };
+    steeringActive = false;
+    pinchStart = 0;
+  }
 }
 renderer.domElement.addEventListener('pointerup', endPointer);
 renderer.domElement.addEventListener('pointercancel', endPointer);
-renderer.domElement.addEventListener('click', (event) => {
-  if (suppressNextClick) {
-    suppressNextClick = false;
-    showTouchDebug('CLICK IGNORATO · il browser lo ha associato a un trascinamento');
-    return;
-  }
-  showTouchDebug('CLICK · clic singolo ricevuto');
-  screenRay(event.clientX, event.clientY);
-});
 renderer.domElement.addEventListener('wheel', (event) => {
   distance = THREE.MathUtils.clamp(distance + event.deltaY * 0.008, 5.5, 15);
 }, { passive: true });
@@ -528,11 +498,11 @@ pauseButton.addEventListener('click', () => {
   paused = !paused;
   pauseButton.setAttribute('aria-pressed', String(paused));
   if (paused) {
-    target.copy(avatar.position);
+    steeringActive = false;
     gesture = 'none';
     presenceNote.textContent = 'Puoi restare qui quanto desideri.';
   } else {
-    presenceNote.textContent = 'Tocca il cortile per scegliere dove andare.';
+    presenceNote.textContent = 'Tieni premuto e sposta il dito per camminare.';
   }
 });
 
@@ -549,10 +519,8 @@ resize();
 function animate() {
   const dt = Math.min(clock.getDelta(), 0.05);
   const elapsed = clock.elapsedTime;
-  const delta = new THREE.Vector3().subVectors(target, avatar.position);
-  delta.y = 0;
-  const length = delta.length();
-  const moving = length > 0.075 && !paused;
+  const delta = steeringDirection.clone();
+  const moving = steeringActive && steeringDirection.lengthSq() > 0.01 && !paused;
 
   if (moving) {
     const desiredYaw = Math.atan2(delta.x, delta.z);
@@ -561,9 +529,9 @@ function animate() {
       Math.cos(desiredYaw - avatar.rotation.y),
     );
     avatar.rotation.y += THREE.MathUtils.clamp(yawDifference, -4.8 * dt, 4.8 * dt);
-    const step = Math.min(length, 2.05 * dt);
-    delta.normalize();
-    avatar.position.addScaledVector(delta, step);
+    avatar.position.addScaledVector(delta, 2.05 * dt);
+    avatar.position.x = THREE.MathUtils.clamp(avatar.position.x, -14.5, 14.5);
+    avatar.position.z = THREE.MathUtils.clamp(avatar.position.z, -14.5, 14.5);
   }
 
   walkBlend = THREE.MathUtils.damp(walkBlend, moving ? 1 : 0, 9, dt);
@@ -588,12 +556,6 @@ function animate() {
   robe.scale.y = 1 + breathing;
   shoulders.position.y = 1.43 + breathing * 1.5;
   head.position.y = 1.82 + Math.sin(elapsed * 1.1) * 0.008 * (1 - walkBlend);
-
-  if (destinationMarker.visible) {
-    const pulse = 1 + Math.sin(elapsed * 4.2) * 0.08;
-    destinationMarker.scale.setScalar(pulse);
-    (destinationMarker.material as THREE.MeshBasicMaterial).opacity = 0.58 + (Math.sin(elapsed * 4.2) + 1) * 0.16;
-  }
 
   updateCamera(dt);
   renderer.render(scene, camera);

@@ -145,16 +145,20 @@ for (const x of [-1.28, 1.28]) {
 }
 
 // Prayer-hall façade: layered massing, recessed portal, crafted arches and a large dome.
-box(15.2, 5.15, 3.8, materials.stone, 0, 2.575, -14.25);
+// Split the former solid facade around a walk-through central entrance.
+box(5.25, 5.15, 3.8, materials.stone, -4.98, 2.575, -14.25);
+box(5.25, 5.15, 3.8, materials.stone, 4.98, 2.575, -14.25);
+box(4.85, 0.82, 3.8, materials.stone, 0, 4.74, -14.25);
 box(15.7, 0.3, 4.05, materials.trim, 0, 5.18, -14.25);
 box(15.35, 0.14, 3.95, coping, 0, 5.38, -14.25);
 box(4.25, 3.8, 0.24, materials.dark, 0, 1.9, -12.28);
 box(4.85, 0.16, 0.34, materials.trim, 0, 3.82, -12.2);
 archRing(0, 3.82, -12.12, 2.05, materials.trim, 0.16);
 for (const x of [-2.12, 2.12]) column(x, -12.05, 3.75, 0.2);
-const portalInner = new THREE.Mesh(new THREE.BoxGeometry(3.55, 2.95, 0.08), new THREE.MeshStandardMaterial({ color: 0x18231f, roughness: 1 }));
-portalInner.position.set(0, 1.42, -12.1);
-scene.add(portalInner);
+// The central opening remains clear: visitors can walk from the courtyard into the hall.
+const threshold = new THREE.Mesh(new THREE.BoxGeometry(4.15, 0.08, 1.2), pathStone);
+threshold.position.set(0, 0.02, -14.5);
+scene.add(threshold);
 for (const x of [-5.2, 5.2]) {
   box(1.5, 2.15, 0.14, materials.dark, x, 2.3, -12.27);
   archRing(x, 3.35, -12.17, 0.72, materials.trim, 0.085);
@@ -204,6 +208,136 @@ for (const y of [6.7, 7.0, 7.34, 7.68, 8.0]) {
 const finial = new THREE.Mesh(new THREE.ConeGeometry(0.17, 0.62, 12), materials.trim);
 finial.position.set(0, 8.95, -14.25);
 scene.add(finial);
+
+// NOOR PRAYER HALL — a walk-through interior, built from reusable low-cost geometry.
+const hallStone = new THREE.MeshStandardMaterial({ color: 0xe8dfcf, roughness: 0.82 });
+const hallIvory = new THREE.MeshStandardMaterial({ color: 0xf2eadb, roughness: 0.72 });
+const hallGold = new THREE.MeshStandardMaterial({ color: 0xb18a51, metalness: 0.28, roughness: 0.48 });
+const hallDeep = new THREE.MeshStandardMaterial({ color: 0x25443f, roughness: 0.88 });
+const hallTile = new THREE.MeshStandardMaterial({ color: 0xc6b18b, roughness: 0.76 });
+const hallGlow = new THREE.MeshBasicMaterial({ color: 0xffd99a });
+const hallFloor = new THREE.Mesh(new THREE.PlaneGeometry(20, 25), hallIvory);
+hallFloor.rotation.x = -Math.PI / 2;
+hallFloor.position.set(0, -0.025, -27.3);
+scene.add(hallFloor);
+
+// Large, restrained marble floor modules with a contrasting central prayer carpet.
+const hallTiles = new THREE.InstancedMesh(new THREE.BoxGeometry(1.88, 0.035, 1.88), hallTile, 120);
+const hallTileDummy = new THREE.Object3D();
+let hallTileIndex = 0;
+for (let ix = -4; ix <= 4; ix++) {
+  for (let iz = -6; iz <= 6; iz++) {
+    hallTileDummy.position.set(ix * 2.05, 0.005, -27.3 + iz * 1.92);
+    hallTileDummy.updateMatrix();
+    hallTiles.setMatrixAt(hallTileIndex++, hallTileDummy.matrix);
+  }
+}
+hallTiles.count = hallTileIndex;
+hallTiles.instanceMatrix.needsUpdate = true;
+scene.add(hallTiles);
+
+const carpet = new THREE.Mesh(new THREE.PlaneGeometry(5.2, 22), new THREE.MeshStandardMaterial({ color: 0x31534d, roughness: 1 }));
+carpet.rotation.x = -Math.PI / 2;
+carpet.position.set(0, 0.025, -27.4);
+scene.add(carpet);
+for (const x of [-2.48, 2.48]) {
+  const runner = new THREE.Mesh(new THREE.BoxGeometry(0.055, 0.012, 21.8), hallGold);
+  runner.position.set(x, 0.04, -27.4);
+  scene.add(runner);
+}
+
+// Side walls and the far qibla wall define a real enclosed interior.
+box(0.55, 8.6, 25, hallStone, -10.1, 4.3, -27.3);
+box(0.55, 8.6, 25, hallStone, 10.1, 4.3, -27.3);
+box(20.2, 8.6, 0.55, hallStone, 0, 4.3, -39.7);
+box(20.2, 0.45, 25.2, hallGold, 0, 8.55, -27.3);
+
+// Repeated pointed arches and paired columns create depth without expensive real-time lighting.
+function pointedArch(x: number, z: number, width: number, height: number, material: THREE.Material, depth = 0.1) {
+  const half = width / 2;
+  const curve = new THREE.CatmullRomCurve3([
+    new THREE.Vector3(x - half, 0.12, z),
+    new THREE.Vector3(x - half, height * 0.62, z),
+    new THREE.Vector3(x - width * 0.28, height * 0.9, z),
+    new THREE.Vector3(x, height, z),
+    new THREE.Vector3(x + width * 0.28, height * 0.9, z),
+    new THREE.Vector3(x + half, height * 0.62, z),
+    new THREE.Vector3(x + half, 0.12, z),
+  ]);
+  const mesh = new THREE.Mesh(new THREE.TubeGeometry(curve, 32, depth, 8, false), material);
+  scene.add(mesh);
+  return mesh;
+}
+for (const z of [-20.5, -26.2, -31.9, -37.1]) {
+  for (const side of [-1, 1]) {
+    const x = side * 8.55;
+    const pillar = new THREE.Mesh(new THREE.CylinderGeometry(0.34, 0.42, 7.1, 20), hallIvory);
+    pillar.position.set(x, 3.55, z);
+    scene.add(pillar);
+    const base = new THREE.Mesh(new THREE.CylinderGeometry(0.56, 0.6, 0.24, 20), hallGold);
+    base.position.set(x, 0.12, z);
+    scene.add(base);
+    const capital = new THREE.Mesh(new THREE.CylinderGeometry(0.55, 0.39, 0.34, 20), hallGold);
+    capital.position.set(x, 7.05, z);
+    scene.add(capital);
+    pointedArch(side * 5.15, z, 6.8, 8.0, hallGold, 0.105);
+    const inset = pointedArch(side * 5.15, z - 0.025, 6.48, 7.72, hallIvory, 0.035);
+    inset.position.y = 0.04;
+  }
+}
+
+// Cross-vault ribs overhead give the hall a monumental rhythm.
+for (const z of [-19.1, -24.4, -29.7, -35.0]) {
+  const vault = new THREE.CatmullRomCurve3([
+    new THREE.Vector3(-9.65, 8.15, z),
+    new THREE.Vector3(-7.2, 9.0, z),
+    new THREE.Vector3(-4.6, 10.15, z),
+    new THREE.Vector3(0, 10.65, z),
+    new THREE.Vector3(4.6, 10.15, z),
+    new THREE.Vector3(7.2, 9.0, z),
+    new THREE.Vector3(9.65, 8.15, z),
+  ]);
+  scene.add(new THREE.Mesh(new THREE.TubeGeometry(vault, 48, 0.16, 8, false), hallGold));
+}
+
+// The qibla wall: a tall recessed mihrab with layered illuminated borders.
+box(6.6, 6.8, 0.18, hallDeep, 0, 3.85, -39.32);
+pointedArch(0, -39.12, 6.2, 7.0, hallGold, 0.2);
+pointedArch(0, -39.08, 5.75, 6.62, hallGlow, 0.045);
+pointedArch(0, -39.02, 5.35, 6.25, hallIvory, 0.035);
+const mihrabNiche = new THREE.Mesh(new THREE.PlaneGeometry(4.9, 5.9), new THREE.MeshBasicMaterial({ color: 0x263b35 }));
+mihrabNiche.position.set(0, 3.1, -39.17);
+scene.add(mihrabNiche);
+for (const x of [-7.6, 7.6]) {
+  const panel = new THREE.Mesh(new THREE.BoxGeometry(2.2, 5.2, 0.08), hallDeep);
+  panel.position.set(x, 3.9, -39.34);
+  scene.add(panel);
+  for (let y = 1.65; y <= 5.9; y += 0.7) {
+    const motif = new THREE.Mesh(new THREE.OctahedronGeometry(0.22, 0), hallGold);
+    motif.position.set(x, y, -39.25);
+    motif.rotation.z = Math.PI / 4;
+    scene.add(motif);
+  }
+}
+
+// Warm recessed light bands are emissive surfaces, not costly real-time spotlights.
+for (const side of [-1, 1]) {
+  const strip = new THREE.Mesh(new THREE.BoxGeometry(0.045, 0.055, 23.5), hallGlow);
+  strip.position.set(side * 9.72, 7.95, -27.3);
+  scene.add(strip);
+}
+for (const z of [-21.5, -27.2, -33.0]) {
+  const ceilingLight = new THREE.Mesh(new THREE.BoxGeometry(13.5, 0.035, 0.045), hallGlow);
+  ceilingLight.position.set(0, 8.08, z);
+  scene.add(ceilingLight);
+}
+
+// A simple patterned border at the entrance makes the transition from courtyard to hall legible.
+for (const x of [-4.3, 4.3]) {
+  const pilaster = new THREE.Mesh(new THREE.BoxGeometry(0.22, 5.2, 0.28), hallGold);
+  pilaster.position.set(x, 2.6, -12.28);
+  scene.add(pilaster);
+}
 
 // Two slender minarets frame the dome and give the courtyard a recognisable skyline.
 for (const x of [-8.3, 8.3]) {
@@ -531,7 +665,7 @@ function animate() {
     avatar.rotation.y += THREE.MathUtils.clamp(yawDifference, -4.8 * dt, 4.8 * dt);
     avatar.position.addScaledVector(delta, 2.05 * dt);
     avatar.position.x = THREE.MathUtils.clamp(avatar.position.x, -14.5, 14.5);
-    avatar.position.z = THREE.MathUtils.clamp(avatar.position.z, -14.5, 14.5);
+    avatar.position.z = THREE.MathUtils.clamp(avatar.position.z, -37.2, 14.5);
   }
 
   walkBlend = THREE.MathUtils.damp(walkBlend, moving ? 1 : 0, 9, dt);

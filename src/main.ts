@@ -177,28 +177,93 @@ for (const x of [-3.35, 3.35]) {
   box(0.72, 0.035, 0.035, materials.trim, x, 2.25, -7.47);
 }
 
-// First-pass human silhouette: robe, sleeves, hands, feet and simple kufi.
+// Procedural humanoid with articulated limbs and a lightweight walk cycle.
+// The rig is built from reusable smooth meshes so it needs no external model download.
 const avatar = new THREE.Group();
-const robe = new THREE.Mesh(new THREE.CylinderGeometry(0.38, 0.5, 1.28, 16), materials.avatar);
-robe.position.y = 0.82; avatar.add(robe);
-const shoulders = new THREE.Mesh(new THREE.SphereGeometry(0.43, 16, 12), materials.avatar);
-shoulders.scale.set(1, 0.62, 0.72); shoulders.position.y = 1.35; avatar.add(shoulders);
-const head = new THREE.Mesh(new THREE.SphereGeometry(0.245, 20, 16), materials.skin);
-head.position.y = 1.72; avatar.add(head);
-const cap = new THREE.Mesh(new THREE.CylinderGeometry(0.22, 0.24, 0.12, 20), materials.trim);
-cap.position.y = 1.94; avatar.add(cap);
+const robe = new THREE.Mesh(new THREE.CylinderGeometry(0.34, 0.49, 1.28, 24), materials.avatar);
+robe.position.y = 0.88;
+avatar.add(robe);
+const robeHem = new THREE.Mesh(new THREE.TorusGeometry(0.475, 0.035, 8, 32), materials.trim);
+robeHem.rotation.x = Math.PI / 2;
+robeHem.position.y = 0.245;
+avatar.add(robeHem);
+const sash = new THREE.Mesh(new THREE.TorusGeometry(0.365, 0.035, 8, 32), materials.trim);
+sash.rotation.x = Math.PI / 2;
+sash.position.y = 1.13;
+avatar.add(sash);
+const shoulders = new THREE.Mesh(new THREE.SphereGeometry(0.39, 20, 16), materials.avatar);
+shoulders.scale.set(1.08, 0.58, 0.78);
+shoulders.position.y = 1.43;
+avatar.add(shoulders);
+const neck = new THREE.Mesh(new THREE.CylinderGeometry(0.105, 0.12, 0.2, 16), materials.skin);
+neck.position.y = 1.62;
+avatar.add(neck);
+const head = new THREE.Mesh(new THREE.SphereGeometry(0.245, 24, 20), materials.skin);
+head.position.y = 1.82;
+avatar.add(head);
+const cap = new THREE.Mesh(new THREE.CylinderGeometry(0.22, 0.245, 0.13, 24), materials.trim);
+cap.position.y = 2.035;
+avatar.add(cap);
+const capBand = new THREE.Mesh(new THREE.TorusGeometry(0.232, 0.018, 6, 24), materials.stone);
+capBand.rotation.x = Math.PI / 2;
+capBand.position.y = 2.0;
+avatar.add(capBand);
+
+const armPivots: THREE.Group[] = [];
+const legPivots: THREE.Group[] = [];
 for (const side of [-1, 1]) {
-  const arm = new THREE.Mesh(new THREE.CylinderGeometry(0.105, 0.13, 0.82, 12), materials.avatar);
-  arm.position.set(side * 0.43, 1.08, 0); arm.rotation.z = side * -0.18; avatar.add(arm);
-  const hand = new THREE.Mesh(new THREE.SphereGeometry(0.105, 12, 10), materials.skin);
-  hand.position.set(side * 0.5, 0.66, 0.02); avatar.add(hand);
-  const foot = new THREE.Mesh(new THREE.BoxGeometry(0.22, 0.13, 0.42), materials.dark);
-  foot.position.set(side * 0.2, 0.07, 0.08); avatar.add(foot);
+  const armPivot = new THREE.Group();
+  armPivot.position.set(side * 0.37, 1.43, 0);
+  const upperArm = new THREE.Mesh(new THREE.CapsuleGeometry(0.105, 0.34, 4, 10), materials.avatar);
+  upperArm.position.y = -0.22;
+  armPivot.add(upperArm);
+  const elbow = new THREE.Mesh(new THREE.SphereGeometry(0.105, 12, 10), materials.avatar);
+  elbow.position.y = -0.42;
+  armPivot.add(elbow);
+  const forearm = new THREE.Mesh(new THREE.CapsuleGeometry(0.085, 0.31, 4, 10), materials.avatar);
+  forearm.position.y = -0.59;
+  armPivot.add(forearm);
+  const cuff = new THREE.Mesh(new THREE.TorusGeometry(0.09, 0.018, 6, 16), materials.trim);
+  cuff.rotation.x = Math.PI / 2;
+  cuff.position.y = -0.77;
+  armPivot.add(cuff);
+  const hand = new THREE.Mesh(new THREE.SphereGeometry(0.09, 14, 12), materials.skin);
+  hand.position.y = -0.82;
+  armPivot.add(hand);
+  avatar.add(armPivot);
+  armPivots.push(armPivot);
+
+  const legPivot = new THREE.Group();
+  legPivot.position.set(side * 0.19, 0.62, 0);
+  const thigh = new THREE.Mesh(new THREE.CapsuleGeometry(0.115, 0.3, 4, 10), materials.dark);
+  thigh.position.y = -0.16;
+  legPivot.add(thigh);
+  const knee = new THREE.Mesh(new THREE.SphereGeometry(0.105, 12, 10), materials.dark);
+  knee.position.y = -0.33;
+  legPivot.add(knee);
+  const shin = new THREE.Mesh(new THREE.CapsuleGeometry(0.085, 0.31, 4, 10), materials.dark);
+  shin.position.y = -0.47;
+  legPivot.add(shin);
+  const foot = new THREE.Mesh(new THREE.BoxGeometry(0.2, 0.12, 0.36), materials.dark);
+  foot.position.set(0, -0.58, 0.09);
+  legPivot.add(foot);
+  avatar.add(legPivot);
+  legPivots.push(legPivot);
 }
 avatar.position.set(0, 0, 5);
 scene.add(avatar);
 
 const target = new THREE.Vector3(0, 0, 5);
+const destinationMarker = new THREE.Mesh(
+  new THREE.TorusGeometry(0.34, 0.025, 8, 32),
+  new THREE.MeshBasicMaterial({ color: 0xf0d49b, transparent: true, opacity: 0.85 }),
+);
+destinationMarker.rotation.x = -Math.PI / 2;
+destinationMarker.position.set(0, 0.035, 5);
+destinationMarker.visible = false;
+scene.add(destinationMarker);
+let walkBlend = 0;
+let walkPhase = 0;
 let angle = 0;
 let distance = 8.5;
 let cameraHeight = 4.2;
@@ -232,6 +297,8 @@ function screenRay(x: number, y: number) {
     target.copy(hit.point);
     target.x = THREE.MathUtils.clamp(target.x, -14.5, 14.5);
     target.z = THREE.MathUtils.clamp(target.z, -14.5, 14.5);
+    destinationMarker.position.set(target.x, 0.035, target.z);
+    destinationMarker.visible = true;
   }
 }
 function gap() {
@@ -291,15 +358,46 @@ resize();
 
 function animate() {
   const dt = Math.min(clock.getDelta(), 0.05);
+  const elapsed = clock.elapsedTime;
   const delta = new THREE.Vector3().subVectors(target, avatar.position);
   delta.y = 0;
   const length = delta.length();
-  if (length > 0.08) {
-    const step = Math.min(length, 2.2 * dt);
+  const moving = length > 0.075;
+
+  if (moving) {
+    const desiredYaw = Math.atan2(delta.x, delta.z);
+    const yawDifference = Math.atan2(
+      Math.sin(desiredYaw - avatar.rotation.y),
+      Math.cos(desiredYaw - avatar.rotation.y),
+    );
+    avatar.rotation.y += THREE.MathUtils.clamp(yawDifference, -4.8 * dt, 4.8 * dt);
+    const step = Math.min(length, 2.05 * dt);
     delta.normalize();
     avatar.position.addScaledVector(delta, step);
-    avatar.rotation.y = Math.atan2(delta.x, delta.z);
   }
+
+  walkBlend = THREE.MathUtils.damp(walkBlend, moving ? 1 : 0, 9, dt);
+  walkPhase += dt * (3.8 + walkBlend * 3.2);
+  const stride = Math.sin(walkPhase) * 0.48 * walkBlend;
+  legPivots[0].rotation.x = stride;
+  legPivots[1].rotation.x = -stride;
+  armPivots[0].rotation.x = -stride * 0.62;
+  armPivots[1].rotation.x = stride * 0.62;
+  armPivots[0].rotation.z = -0.045 - walkBlend * 0.025;
+  armPivots[1].rotation.z = 0.045 + walkBlend * 0.025;
+
+  // A restrained idle breath keeps the character from looking frozen.
+  const breathing = Math.sin(elapsed * 1.7) * 0.006 * (1 - walkBlend);
+  robe.scale.y = 1 + breathing;
+  shoulders.position.y = 1.43 + breathing * 1.5;
+  head.position.y = 1.82 + Math.sin(elapsed * 1.1) * 0.008 * (1 - walkBlend);
+
+  if (destinationMarker.visible) {
+    const pulse = 1 + Math.sin(elapsed * 4.2) * 0.08;
+    destinationMarker.scale.setScalar(pulse);
+    (destinationMarker.material as THREE.MeshBasicMaterial).opacity = 0.58 + (Math.sin(elapsed * 4.2) + 1) * 0.16;
+  }
+
   updateCamera(dt);
   renderer.render(scene, camera);
   requestAnimationFrame(animate);

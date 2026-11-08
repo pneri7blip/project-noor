@@ -1,0 +1,17 @@
+# Dependencies and generated output
+node_modules/
+dist/
+.vite/
+coverage/
+
+# Local environment and secrets
+.env
+.env.*
+!.env.example
+*.local
+
+# Editor, OS and Codespaces artifacts
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/

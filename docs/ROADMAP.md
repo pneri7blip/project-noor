@@ -7,12 +7,12 @@
 
 **Goal:** establish a clear product direction and a testable scope.
 
-- [x] Create the private GitHub repository for documentation and version history.
+- [x] Create the public GitHub repository for documentation and version history.
 - [x] Draft the initial product vision and principles.
 - [x] Define the first prototype scope.
 - [x] Build and open the initial Three.js + TypeScript + Vite prototype on the target Android phone.
 - [ ] Define the Android test-device and browser baseline.
-- [ ] Establish an initial visual direction.
+- [x] Establish Sansa as the permanent UX benchmark; adapt its browser-first, low-friction, atmospheric and quiet-presence principles to Noor.
 
 **Exit criteria:** the first prototype can be built without unresolved product-scope questions.
 
@@ -20,12 +20,14 @@
 
 **Goal:** create the first meaningful experience, optimized for Android.
 
-- [x] Add the first lightweight browser-based 3D scene to the repository (build verification pending).
-- [ ] Refine the peaceful courtyard and mosque-inspired landmark beyond the current geometric blockout.
-- [ ] Improve the garden, greenery, water, and lighting; current elements are placeholders.
-- [x] Implement and test initial tap movement, camera orbit, and pinch zoom on Android.
+- [x] Add the first lightweight browser-based 3D scene to the repository; CI build and type-check passed.
+- [ ] Replace the geometric courtyard and mosque-inspired landmark blockout with a coherent, high-quality environment using properly licensed optimized assets.
+- [ ] Improve garden, greenery, water, lighting, and atmosphere; current elements remain procedural placeholders.
+- [x] Implement tap movement, camera orbit, and pinch zoom; user confirmed these controls work on Android.
 - [x] Add initial mouse fallback and camera reset control in source.
-- [ ] Optimize loading, memory use, and frame rate.
+- [ ] Optimize loading, memory use, and frame rate on the target Android phone.
+- [x] Add a lightweight articulated procedural avatar and basic walk cycle.
+- [x] Add a mobile-first action bar, simple greeting gesture, and pause control; CI build and type-check passed.
 - [x] Open the prototype in a real mobile browser on the target Android phone; detailed performance testing remains pending.
 
 **Exit criteria:**
@@ -38,7 +40,7 @@
 **Goal:** add a small number of purposeful interactions without gamification.
 
 Candidate features:
-- [ ] A place to sit or pause.
+- [x] A simple pause / stillness control (first implementation).
 - [ ] User-controlled ambient audio.
 - [ ] A simple, non-competitive dhikr/tasbih counter.
 - [ ] Optional Quran recitation only after rights, sourcing, and qualified review.
@@ -52,7 +54,7 @@ Candidate features:
 Candidate features:
 - [ ] Anonymous, temporary visitor presence.
 - [ ] Simple avatars and movement.
-- [ ] A restrained Salam interaction.
+- [x] A first simple greeting gesture; refine its animation and semantics before shared presence.
 - [ ] Reporting, blocking, moderation, and safety controls before open communication.
 - [ ] Privacy and minor-protection review.
 
@@ -87,7 +89,7 @@ These features add cost and risk before the core experience has been validated.
 
 1. [x] Select Three.js + TypeScript + Vite for Prototype 01; see [engine decision](ENGINE-DECISION.md).
 2. [x] Add the first procedural courtyard, landmark, garden, placeholder avatar, and touch interaction implementation.
-3. [ ] Confirm the production build using the added GitHub Actions workflow and resolve any compiler/runtime issues.
-4. [ ] Publish a shareable HTTPS preview without making the private source repository public.
+3. [x] Confirm the production build and TypeScript checks through GitHub Actions for the latest interaction-layer pull request.
+4. [ ] Publish a shareable HTTPS preview and decide the appropriate public-source strategy.
 5. [ ] Test on the actual Android device and record performance and usability observations.
 6. [ ] Iterate before adding religious content or social features.

@@ -24,7 +24,7 @@ The experience should feel meaningful even when a visitor is alone.
 - Respect for Islamic practice and the diversity of Muslim traditions.
 - Privacy by design; religious activity must never become an advertising or profiling signal.
 
-Sansa is a user-experience reference only. Project Noor will develop its own identity, architecture, content, and implementation.
+**Sansa is the permanent product benchmark for Noor.** Every major UX and technical decision must be compared against its strengths: immediate browser entry, intuitive avatar movement, simple gestures, atmospheric spaces, quiet shared presence, and a minimal interface. Noor must adapt these principles to an Islamic context rather than copy Buddhist symbols, rituals, assets, or content. Public reporting confirms that Sansa was created with ChatGPT Codex using vibe coding; its exact framework and backend architecture have not been publicly established. We will not pretend otherwise.
 
 ## First milestone
 
@@ -50,8 +50,8 @@ Project Noor is a digital environment for reflection and community. It does **no
 
 ## Current status
 
-**Stage:** first interactive prototype running in GitHub Codespaces; initial Android interaction test completed. Visual quality, performance, and build validation are still in progress.  
-**Stack:** Three.js + TypeScript + Vite  
-**Next step:** refine the 3D environment and avatar, then validate loading and performance on Android.
+**Stage:** single-user browser prototype running in Codespaces and opened on Android. Tap-to-move, camera orbit, pinch zoom, a procedural articulated avatar, and a basic walk cycle are implemented. The Sansa-inspired mobile action layer now adds a greeting gesture and pause control. The latest pull-request build and type-check passed; the post-merge main-branch workflow is running.  
+**Stack:** Three.js + TypeScript + Vite. This is Noor's current implementation, not a claim about Sansa's undisclosed stack.  
+**Next step:** replace the geometric blockout with properly licensed, optimized 3D assets and move toward a more convincing environment and rigged avatar; then validate Android performance.
 
 This repository is an evolving product workspace. Scope and implementation choices may change after testing with real users.

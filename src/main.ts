@@ -464,7 +464,9 @@ renderer.domElement.addEventListener('pointermove', (event) => {
     if (pinchStart > 0) distance = THREE.MathUtils.clamp(pinchDistance * pinchStart / Math.max(1, currentGap), 5.5, 15);
     gestureMoved = true;
   } else if (pointers.size === 1 && dragging) {
-    if (Math.hypot(event.clientX - gestureStart.x, event.clientY - gestureStart.y) > 5) gestureMoved = true;
+    // Ignore small finger jitter so an ordinary Android tap remains a movement command.
+    // A deliberate drag still rotates the camera.
+    if (Math.hypot(event.clientX - gestureStart.x, event.clientY - gestureStart.y) > 12) gestureMoved = true;
     if (gestureMoved) {
       angle -= dx * 0.006;
       cameraHeight = THREE.MathUtils.clamp(cameraHeight + dy * 0.008, 2.8, 7);

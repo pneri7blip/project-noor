@@ -1,11 +1,32 @@
 import * as THREE from 'three';
 
+function makeMarbleTexture() {
+  const canvas = document.createElement('canvas');
+  canvas.width = 512; canvas.height = 512;
+  const ctx = canvas.getContext('2d');
+  if (!ctx) throw new Error('Canvas 2D context unavailable');
+  ctx.fillStyle = '#f5f3ee'; ctx.fillRect(0, 0, 512, 512);
+  for (let i = 0; i < 32; i++) {
+    const x = (i * 137 + 23) % 512, y = (i * 83 + 61) % 512;
+    ctx.beginPath(); ctx.moveTo(x - 150, y - 85);
+    ctx.bezierCurveTo(x - 65, y - 42, x + 20, y + 35, x + 160, y + 92);
+    ctx.strokeStyle = i % 5 === 0 ? 'rgba(145,139,129,0.20)' : 'rgba(196,190,180,0.11)';
+    ctx.lineWidth = i % 6 === 0 ? 2 : 1; ctx.stroke();
+  }
+  const texture = new THREE.CanvasTexture(canvas);
+  texture.colorSpace = THREE.SRGBColorSpace;
+  texture.wrapS = THREE.RepeatWrapping; texture.wrapT = THREE.RepeatWrapping;
+  texture.anisotropy = 4;
+  return texture;
+}
+
 // Noor's courtyard architecture. The avatar, camera and touch controls live in main.ts.
 export function createArchitecture(scene: THREE.Scene) {
+  const marble = makeMarbleTexture();
   const materials = {
-    ground: new THREE.MeshStandardMaterial({ color: 0xb9ad91, roughness: 1 }),
-    stone: new THREE.MeshStandardMaterial({ color: 0xe8dfcd, roughness: 0.82 }),
-    ivory: new THREE.MeshStandardMaterial({ color: 0xf3eee2, roughness: 0.58 }),
+    ground: new THREE.MeshStandardMaterial({ color: 0xffffff, map: marble, roughness: 0.43, metalness: 0.015 }),
+    stone: new THREE.MeshStandardMaterial({ color: 0xf0ede5, map: marble, roughness: 0.5, metalness: 0.01 }),
+    ivory: new THREE.MeshStandardMaterial({ color: 0xfaf8f2, map: marble, roughness: 0.34, metalness: 0.015 }),
     trim: new THREE.MeshStandardMaterial({ color: 0xb69a68, roughness: 0.38, metalness: 0.28 }),
     dark: new THREE.MeshStandardMaterial({ color: 0x315047, roughness: 0.8 }),
     green: new THREE.MeshStandardMaterial({ color: 0x536e55, roughness: 1 }),
@@ -38,56 +59,94 @@ export function createArchitecture(scene: THREE.Scene) {
     return add(new THREE.Mesh(new THREE.TubeGeometry(curve, 36, tube, 8, false), material));
   }
 
-  function column(x: number, z: number, height = 3.8, radius = 0.2) {
-    cylinder(radius * 0.86, radius, height, materials.ivory, x, height / 2, z, 20);
-    cylinder(radius * 1.55, radius * 1.5, 0.18, materials.trim, x, 0.09, z, 20);
-    cylinder(radius * 1.48, radius * 1.1, 0.2, materials.trim, x, height - 0.08, z, 20);
-    cylinder(radius * 1.12, radius * 1.12, 0.07, materials.ivory, x, height + 0.04, z, 20);
+  function column(x: number, z: number, height = 4.4, radius = 0.22) {
+    const g = new THREE.Group();
+    const part = (rt: number, rb: number, h: number, y: number, material: THREE.Material) => {
+      const mesh = new THREE.Mesh(new THREE.CylinderGeometry(rt, rb, h, 40), material);
+      mesh.position.y = y; g.add(mesh);
+    };
+    part(radius * 1.72, radius * 1.8, 0.18, 0.09, materials.trim);
+    part(radius * 1.48, radius * 1.5, 0.12, 0.24, materials.ivory);
+    part(radius * 0.82, radius, height - 0.72, height / 2, materials.ivory);
+    part(radius * 1.12, radius * 1.12, 0.12, height - 0.28, materials.trim);
+    part(radius * 1.72, radius * 1.52, 0.2, height - 0.12, materials.trim);
+    part(radius * 1.5, radius * 1.45, 0.1, height + 0.03, materials.ivory);
+    const fluteMat = new THREE.MeshStandardMaterial({ color: 0xffffff, roughness: 0.28 });
+    for (let i = 0; i < 16; i++) {
+      const a = i / 16 * Math.PI * 2;
+      const flute = new THREE.Mesh(new THREE.CylinderGeometry(0.012, 0.012, height - 0.8, 8), fluteMat);
+      flute.position.set(Math.cos(a) * radius * 0.81, height / 2, Math.sin(a) * radius * 0.81);
+      g.add(flute);
+    }
+    for (let i = 0; i < 12; i++) {
+      const a = i / 12 * Math.PI * 2;
+      const leaf = new THREE.Mesh(new THREE.SphereGeometry(radius * 0.42, 12, 10), materials.trim);
+      leaf.scale.set(0.7, 1.35, 0.62);
+      leaf.position.set(Math.cos(a) * radius * 1.2, height - 0.25, Math.sin(a) * radius * 1.2);
+      g.add(leaf);
+    }
+    g.position.set(x, 0, z); scene.add(g);
   }
 
   function dome(x: number, z: number, radius: number, baseY: number, height: number) {
-    cylinder(radius * 1.04, radius * 1.08, 0.28, materials.trim, x, baseY, z, 48);
-    cylinder(radius * 0.94, radius, 0.88, materials.ivory, x, baseY + 0.56, z, 48);
-    // Tall, gently pointed profile rather than a primitive hemisphere.
-    const profile = [
-      new THREE.Vector2(0, 0), new THREE.Vector2(radius, 0),
-      new THREE.Vector2(radius * 0.98, height * 0.16),
-      new THREE.Vector2(radius * 0.86, height * 0.39),
-      new THREE.Vector2(radius * 0.64, height * 0.65),
-      new THREE.Vector2(radius * 0.36, height * 0.86),
-      new THREE.Vector2(radius * 0.12, height * 0.98),
-      new THREE.Vector2(0, height),
-    ];
-    add(new THREE.Mesh(new THREE.LatheGeometry(profile, 64), materials.ivory), x, baseY + 1.0, z);
+    cylinder(radius * 1.08, radius * 1.1, 0.24, materials.trim, x, baseY, z, 64);
+    cylinder(radius * 1.02, radius * 1.02, 0.72, materials.ivory, x, baseY + 0.47, z, 64);
+    // Tall drum with narrow recessed windows and gold pilasters.
     for (let i = 0; i < 16; i++) {
       const a = i / 16 * Math.PI * 2;
-      const ribCurve = new THREE.CatmullRomCurve3([
-        new THREE.Vector3(x + Math.cos(a) * radius * 0.98, baseY + 1.05, z + Math.sin(a) * radius * 0.98),
-        new THREE.Vector3(x + Math.cos(a) * radius * 0.78, baseY + 1.0 + height * 0.42, z + Math.sin(a) * radius * 0.78),
-        new THREE.Vector3(x + Math.cos(a) * radius * 0.34, baseY + 1.0 + height * 0.86, z + Math.sin(a) * radius * 0.34),
-        new THREE.Vector3(x, baseY + 1.0 + height, z),
-      ]);
-      add(new THREE.Mesh(new THREE.TubeGeometry(ribCurve, 24, 0.025, 5, false), materials.trim));
+      const window = new THREE.Mesh(new THREE.BoxGeometry(0.2, 0.42, 0.06), materials.dark);
+      window.position.set(x + Math.cos(a) * radius, baseY + 0.47, z + Math.sin(a) * radius);
+      window.lookAt(x, baseY + 0.47, z); scene.add(window);
+      const pilaster = new THREE.Mesh(new THREE.CylinderGeometry(0.035, 0.045, 0.82, 10), materials.trim);
+      pilaster.position.set(x + Math.cos(a) * radius * 1.02, baseY + 0.48, z + Math.sin(a) * radius * 1.02);
+      scene.add(pilaster);
     }
-    cylinder(0.13, 0.18, 0.18, materials.trim, x, baseY + 1.0 + height, z, 16);
-    add(new THREE.Mesh(new THREE.ConeGeometry(0.12, 0.48, 12), materials.trim), x, baseY + 1.0 + height + 0.29, z);
+    const profile = [
+      new THREE.Vector2(0, 0), new THREE.Vector2(radius, 0),
+      new THREE.Vector2(radius * 0.98, height * 0.14),
+      new THREE.Vector2(radius * 0.9, height * 0.32),
+      new THREE.Vector2(radius * 0.76, height * 0.5),
+      new THREE.Vector2(radius * 0.56, height * 0.68),
+      new THREE.Vector2(radius * 0.34, height * 0.84),
+      new THREE.Vector2(radius * 0.13, height * 0.96),
+      new THREE.Vector2(0, height),
+    ];
+    add(new THREE.Mesh(new THREE.LatheGeometry(profile, 96), materials.ivory), x, baseY + 0.84, z);
+    // Fine radial ribs follow the curved dome shell.
+    for (let i = 0; i < 24; i++) {
+      const a = i / 24 * Math.PI * 2;
+      const ribCurve = new THREE.CatmullRomCurve3([
+        new THREE.Vector3(x + Math.cos(a) * radius * 0.98, baseY + 0.9, z + Math.sin(a) * radius * 0.98),
+        new THREE.Vector3(x + Math.cos(a) * radius * 0.82, baseY + 0.84 + height * 0.42, z + Math.sin(a) * radius * 0.82),
+        new THREE.Vector3(x + Math.cos(a) * radius * 0.52, baseY + 0.84 + height * 0.72, z + Math.sin(a) * radius * 0.52),
+        new THREE.Vector3(x + Math.cos(a) * radius * 0.12, baseY + 0.84 + height * 0.97, z + Math.sin(a) * radius * 0.12),
+      ]);
+      add(new THREE.Mesh(new THREE.TubeGeometry(ribCurve, 32, 0.026, 6, false), materials.trim));
+    }
+    cylinder(0.15, 0.19, 0.2, materials.trim, x, baseY + 0.84 + height, z, 24);
+    add(new THREE.Mesh(new THREE.ConeGeometry(0.14, 0.58, 24), materials.trim), x, baseY + 1.22 + height, z);
+    add(new THREE.Mesh(new THREE.SphereGeometry(0.1, 20, 16), materials.trim), x, baseY + 1.56 + height, z);
   }
 
   function minaret(x: number, z: number) {
-    cylinder(0.48, 0.62, 7.6, materials.ivory, x, 3.8, z, 24);
-    cylinder(0.76, 0.68, 0.2, materials.trim, x, 1.15, z, 24);
-    cylinder(0.7, 0.62, 0.18, materials.trim, x, 5.55, z, 24);
-    cylinder(0.62, 0.52, 0.16, materials.trim, x, 6.1, z, 24);
-    cylinder(0.42, 0.5, 1.1, materials.ivory, x, 6.75, z, 24);
-    // Open lantern crown and its small arches.
+    cylinder(0.72, 0.78, 0.2, materials.trim, x, 0.1, z, 40);
+    cylinder(0.52, 0.62, 1.0, materials.ivory, x, 0.72, z, 40);
+    cylinder(0.4, 0.5, 5.1, materials.ivory, x, 3.77, z, 40);
+    for (const y of [1.45, 5.95, 6.35, 8.35]) {
+      cylinder(0.68, 0.62, 0.16, materials.trim, x, y, z, 40);
+      cylinder(0.59, 0.57, 0.1, materials.ivory, x, y + 0.12, z, 40);
+    }
+    cylinder(0.46, 0.48, 1.2, materials.ivory, x, 7.18, z, 40);
     for (let i = 0; i < 8; i++) {
       const a = i / 8 * Math.PI * 2;
-      const pillar = new THREE.Mesh(new THREE.CylinderGeometry(0.045, 0.055, 0.88, 8), materials.trim);
-      add(pillar, x + Math.cos(a) * 0.34, 6.78, z + Math.sin(a) * 0.34);
+      const pillar = new THREE.Mesh(new THREE.CylinderGeometry(0.035, 0.045, 1.0, 10), materials.trim);
+      add(pillar, x + Math.cos(a) * 0.37, 7.18, z + Math.sin(a) * 0.37);
     }
-    cylinder(0.58, 0.48, 0.13, materials.trim, x, 7.25, z, 24);
-    add(new THREE.Mesh(new THREE.ConeGeometry(0.58, 1.25, 24), materials.trim), x, 7.92, z);
-    add(new THREE.Mesh(new THREE.SphereGeometry(0.1, 12, 10), materials.trim), x, 8.62, z);
+    cylinder(0.68, 0.5, 0.2, materials.trim, x, 8.0, z, 40);
+    cylinder(0.27, 0.4, 2.1, materials.ivory, x, 9.15, z, 40);
+    add(new THREE.Mesh(new THREE.ConeGeometry(0.42, 1.4, 32), materials.trim), x, 10.9, z);
+    const crescent = new THREE.Mesh(new THREE.TorusGeometry(0.18, 0.035, 8, 24, Math.PI * 1.65), materials.trim);
+    add(crescent, x, 11.7, z);
   }
 
   function tree(x: number, z: number, scale = 1) {
@@ -160,20 +219,22 @@ export function createArchitecture(scene: THREE.Scene) {
     const window = box(0.28, 0.48, 0.08, materials.dark, Math.cos(a) * 2.5, 5.98, -14.25 + Math.sin(a) * 2.5);
     window.lookAt(0, 5.98, -14.25);
   }
-  dome(0, -14.25, 2.55, 6.48, 2.55);
-  minaret(-8.25, -14.1);
-  minaret(8.25, -14.1);
+  dome(0, -14.25, 4.05, 6.48, 3.7);
+  dome(-5.45, -14.0, 1.55, 5.9, 1.9);
+  dome(5.45, -14.0, 1.55, 5.9, 1.9);
+  minaret(-9.5, -14.1);
+  minaret(9.5, -14.1);
 
-  // Arcaded wings make the courtyard feel enclosed without blocking the view.
+  // Deep arcades: more bays, larger columns and layered gold cornices.
   for (const side of [-1, 1]) {
-    for (let i = 0; i < 6; i++) {
-      const z = -9.6 + i * 2.55;
-      column(side * 8.6, z, 3.55, 0.2);
-      column(side * 12.0, z, 3.55, 0.2);
-      box(3.65, 0.2, 0.32, materials.trim, side * 10.3, 3.62, z);
-      arch(side * 10.3, z, 3.4, 3.55, 1.55, materials.trim, 0.09);
-      // Fine parapet line above each bay.
-      box(3.7, 0.08, 0.38, materials.ivory, side * 10.3, 3.82, z);
+    for (let i = 0; i < 7; i++) {
+      const z = -10.2 + i * 2.85;
+      column(side * 8.7, z, 4.0, 0.22);
+      column(side * 12.0, z, 4.0, 0.22);
+      box(3.55, 0.2, 0.42, materials.trim, side * 10.35, 4.08, z);
+      arch(side * 10.35, z, 3.4, 4.0, 1.65, materials.ivory, 0.12);
+      box(3.62, 0.09, 0.42, materials.ivory, side * 10.35, 4.28, z);
+      box(3.2, 0.035, 2.5, materials.dark, side * 10.35, 4.02, z);
     }
   }
 

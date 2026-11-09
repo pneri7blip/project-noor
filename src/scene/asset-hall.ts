@@ -2,7 +2,7 @@ import * as THREE from 'three';
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 
 const BAY_URL = 'https://cdn.3dassets.dev/assets/38094/v1/model.glb';
-const QIBLA_URL = 'https://cdn.3dassets.dev/assets/38102/v1/model.glb';
+const QIBLA_URL = 'https://cdn.3dassets.dev/assets/38099/v1/model.glb';
 
 function makeMarbleTexture() {
   const canvas = document.createElement('canvas');

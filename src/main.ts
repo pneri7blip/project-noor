@@ -1,5 +1,6 @@
 import * as THREE from 'three';
 import { createArchitecture } from './scene/architecture';
+import { loadAssetPrayerHall } from './scene/asset-hall';
 import './style.css';
 
 const app = document.querySelector<HTMLDivElement>('#app')!;
@@ -277,6 +278,8 @@ function animate() {
   renderer.render(scene, camera);
   requestAnimationFrame(animate);
 }
-animate();
-loading.remove();
-window.setTimeout(() => { hint.style.opacity = '0'; }, 6500);
+loadAssetPrayerHall(scene).finally(() => {
+  animate();
+  loading.remove();
+  window.setTimeout(() => { hint.style.opacity = '0'; }, 6500);
+});

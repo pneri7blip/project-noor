@@ -184,242 +184,31 @@ export function createArchitecture(scene: THREE.Scene) {
   finial.position.set(0, 8.95, -14.25);
   scene.add(finial);
   
-  // NOOR PRAYER HALL — a walk-through interior, built from reusable low-cost geometry.
-  const hallStone = new THREE.MeshStandardMaterial({ color: 0xe8dfcf, roughness: 0.82 });
-  const hallIvory = new THREE.MeshStandardMaterial({ color: 0xf2eadb, roughness: 0.72 });
-  const hallGold = new THREE.MeshStandardMaterial({ color: 0xb18a51, metalness: 0.28, roughness: 0.48 });
-  const hallDeep = new THREE.MeshStandardMaterial({ color: 0x25443f, roughness: 0.88 });
-  const hallTile = new THREE.MeshStandardMaterial({ color: 0xc6b18b, roughness: 0.76 });
-  const hallGlow = new THREE.MeshBasicMaterial({ color: 0xffd99a });
-  const hallFloor = new THREE.Mesh(new THREE.PlaneGeometry(20, 25), hallIvory);
-  hallFloor.rotation.x = -Math.PI / 2;
-  hallFloor.position.set(0, -0.025, -27.3);
-  scene.add(hallFloor);
-  
-  // Large, restrained marble floor modules with a contrasting central prayer carpet.
-  const hallTiles = new THREE.InstancedMesh(new THREE.BoxGeometry(1.88, 0.035, 1.88), hallTile, 120);
-  const hallTileDummy = new THREE.Object3D();
-  let hallTileIndex = 0;
-  for (let ix = -4; ix <= 4; ix++) {
-    for (let iz = -6; iz <= 6; iz++) {
-      hallTileDummy.position.set(ix * 2.05, 0.005, -27.3 + iz * 1.92);
-      hallTileDummy.updateMatrix();
-      hallTiles.setMatrixAt(hallTileIndex++, hallTileDummy.matrix);
-    }
-  }
-  hallTiles.count = hallTileIndex;
-  hallTiles.instanceMatrix.needsUpdate = true;
-  scene.add(hallTiles);
-  
-  const carpet = new THREE.Mesh(new THREE.PlaneGeometry(5.2, 22), new THREE.MeshStandardMaterial({ color: 0xffffff, map: makeCarpetTexture(), roughness: 0.96 }));
-  carpet.rotation.x = -Math.PI / 2;
-  carpet.position.set(0, 0.025, -27.4);
-  scene.add(carpet);
-  for (const x of [-2.48, 2.48]) {
-    const runner = new THREE.Mesh(new THREE.BoxGeometry(0.055, 0.012, 21.8), hallGold);
-    runner.position.set(x, 0.04, -27.4);
-    scene.add(runner);
-  }
-  
-  // Side walls and the far qibla wall define a real enclosed interior.
-  box(0.55, 8.6, 25, hallStone, -10.1, 4.3, -27.3);
-  box(0.55, 8.6, 25, hallStone, 10.1, 4.3, -27.3);
-  box(20.2, 8.6, 0.55, hallStone, 0, 4.3, -39.7);
-  box(20.2, 0.45, 25.2, hallIvory, 0, 8.55, -27.3);
-  
-  // Repeated pointed arches and paired columns create depth without expensive real-time lighting.
-  function pointedArch(x: number, z: number, width: number, height: number, material: THREE.Material, depth = 0.1) {
-    const half = width / 2;
-    const curve = new THREE.CatmullRomCurve3([
-      new THREE.Vector3(x - half, 0.12, z),
-      new THREE.Vector3(x - half, height * 0.62, z),
-      new THREE.Vector3(x - width * 0.28, height * 0.9, z),
-      new THREE.Vector3(x, height, z),
-      new THREE.Vector3(x + width * 0.28, height * 0.9, z),
-      new THREE.Vector3(x + half, height * 0.62, z),
-      new THREE.Vector3(x + half, 0.12, z),
-    ]);
-    const mesh = new THREE.Mesh(new THREE.TubeGeometry(curve, 32, depth, 8, false), material);
-    scene.add(mesh);
-    return mesh;
-  }
-  for (const z of [-20.5, -26.2, -31.9, -37.1]) {
-    for (const side of [-1, 1]) {
-      const x = side * 8.55;
-      const pillar = new THREE.Mesh(new THREE.CylinderGeometry(0.34, 0.42, 7.1, 20), hallIvory);
-      pillar.position.set(x, 3.55, z);
-      scene.add(pillar);
-      const base = new THREE.Mesh(new THREE.CylinderGeometry(0.56, 0.6, 0.24, 20), hallGold);
-      base.position.set(x, 0.12, z);
-      scene.add(base);
-      const capital = new THREE.Mesh(new THREE.CylinderGeometry(0.55, 0.39, 0.34, 20), hallGold);
-      capital.position.set(x, 7.05, z);
-      scene.add(capital);
-      pointedArch(side * 5.15, z, 6.8, 8.0, hallGold, 0.105);
-      const inset = pointedArch(side * 5.15, z - 0.025, 6.48, 7.72, hallIvory, 0.035);
-      inset.position.y = 0.04;
-    }
-  }
-  
-  // Cross-vault ribs overhead give the hall a monumental rhythm.
-  for (const z of [-19.1, -24.4, -29.7, -35.0]) {
-    const vault = new THREE.CatmullRomCurve3([
-      new THREE.Vector3(-9.65, 7.55, z),
-      new THREE.Vector3(-7.2, 7.85, z),
-      new THREE.Vector3(-4.6, 8.12, z),
-      new THREE.Vector3(0, 8.25, z),
-      new THREE.Vector3(4.6, 8.12, z),
-      new THREE.Vector3(7.2, 7.85, z),
-      new THREE.Vector3(9.65, 7.55, z),
-    ]);
-    scene.add(new THREE.Mesh(new THREE.TubeGeometry(vault, 48, 0.16, 8, false), hallGold));
-  }
-  
-  // The qibla wall: a tall recessed mihrab with layered illuminated borders.
-  box(6.6, 6.8, 0.18, hallDeep, 0, 3.85, -39.32);
-  pointedArch(0, -39.12, 6.2, 7.0, hallGold, 0.2);
-  pointedArch(0, -39.08, 5.75, 6.62, hallGlow, 0.045);
-  pointedArch(0, -39.02, 5.35, 6.25, hallIvory, 0.035);
-  const mihrabNiche = new THREE.Mesh(new THREE.PlaneGeometry(4.9, 5.9), new THREE.MeshBasicMaterial({ color: 0x263b35 }));
-  mihrabNiche.position.set(0, 3.1, -39.17);
-  scene.add(mihrabNiche);
-  for (const x of [-7.6, 7.6]) {
-    const panel = new THREE.Mesh(new THREE.BoxGeometry(2.2, 5.2, 0.08), hallDeep);
-    panel.position.set(x, 3.9, -39.34);
-    scene.add(panel);
-    for (let y = 1.65; y <= 5.9; y += 0.7) {
-      const motif = new THREE.Mesh(new THREE.OctahedronGeometry(0.22, 0), hallGold);
-      motif.position.set(x, y, -39.25);
-      motif.rotation.z = Math.PI / 4;
-      scene.add(motif);
-    }
-  }
-  
-  // Warm recessed light bands are emissive surfaces, not costly real-time spotlights.
-  for (const side of [-1, 1]) {
-    const strip = new THREE.Mesh(new THREE.BoxGeometry(0.045, 0.055, 23.5), hallGlow);
-    strip.position.set(side * 9.72, 7.95, -27.3);
-    scene.add(strip);
-  }
-  for (const z of [-21.5, -27.2, -33.0]) {
-    const ceilingLight = new THREE.Mesh(new THREE.BoxGeometry(13.5, 0.035, 0.045), hallGlow);
-    ceilingLight.position.set(0, 8.08, z);
-    scene.add(ceilingLight);
-  }
-  
-  
-  // NOOR MATERIAL PASS — procedural, GPU-friendly surface detail.
-  // Canvas textures are generated once, reused, and kept deliberately modest for mobile.
-  function makeMarbleTexture() {
-    const canvas = document.createElement('canvas');
-    canvas.width = 512; canvas.height = 512;
-    const ctx = canvas.getContext('2d')!;
-    ctx.fillStyle = '#e8e0d2'; ctx.fillRect(0, 0, 512, 512);
-    for (let i = 0; i < 34; i++) {
-      const x = (i * 83) % 512, y = (i * 137) % 512;
-      ctx.beginPath(); ctx.moveTo(x - 120, y - 70);
-      ctx.bezierCurveTo(x - 30, y - 30, x + 20, y + 35, x + 150, y + 90);
-      ctx.strokeStyle = i % 3 === 0 ? 'rgba(157,139,111,0.18)' : 'rgba(255,255,255,0.32)';
-      ctx.lineWidth = i % 4 === 0 ? 2.2 : 1; ctx.stroke();
-    }
-    const texture = new THREE.CanvasTexture(canvas);
-    texture.colorSpace = THREE.SRGBColorSpace;
-    texture.wrapS = texture.wrapT = THREE.RepeatWrapping;
-    texture.repeat.set(2, 3);
-    return texture;
-  }
-  function makeCarpetTexture() {
-    const canvas = document.createElement('canvas');
-    canvas.width = 512; canvas.height = 512;
-    const ctx = canvas.getContext('2d')!;
-    ctx.fillStyle = '#173e38'; ctx.fillRect(0, 0, 512, 512);
-    ctx.strokeStyle = '#c9a66a'; ctx.lineWidth = 5;
-    ctx.strokeRect(17, 17, 478, 478); ctx.strokeRect(31, 31, 450, 450);
-    ctx.strokeStyle = 'rgba(226,194,132,0.8)'; ctx.lineWidth = 2;
-    for (let y = 52; y < 480; y += 32) for (let x = 52; x < 480; x += 32) {
-      ctx.save(); ctx.translate(x, y); ctx.rotate(Math.PI / 4);
-      ctx.strokeRect(-8, -8, 16, 16);
-      ctx.beginPath(); ctx.moveTo(-15, 0); ctx.lineTo(15, 0); ctx.moveTo(0, -15); ctx.lineTo(0, 15); ctx.stroke();
-      ctx.restore();
-    }
-    const texture = new THREE.CanvasTexture(canvas);
-    texture.colorSpace = THREE.SRGBColorSpace;
-    texture.wrapS = texture.wrapT = THREE.RepeatWrapping;
-    texture.repeat.set(1, 2);
-    return texture;
-  }
-  const marbleMap = makeMarbleTexture();
-  hallIvory.map = marbleMap;
-  hallIvory.needsUpdate = true;
-  hallTile.map = marbleMap;
-  hallTile.needsUpdate = true;
-  
-  
-  // Decorative wall panels: repeated eight-point geometry, instanced to keep draw calls low.
-  const motifGeometry = new THREE.BufferGeometry();
-  const motifVertices: number[] = [];
-  for (let i = 0; i < 8; i++) {
-    const a = (i / 8) * Math.PI * 2, b = ((i + 1) / 8) * Math.PI * 2;
-    motifVertices.push(0, 0, 0, Math.cos(a) * 0.42, Math.sin(a) * 0.42, 0, Math.cos(b) * 0.42, Math.sin(b) * 0.42, 0);
-  }
-  motifGeometry.setAttribute('position', new THREE.Float32BufferAttribute(motifVertices, 3));
-  motifGeometry.computeVertexNormals();
-  const motifMaterial = new THREE.MeshStandardMaterial({ color: 0xc4a36a, metalness: 0.38, roughness: 0.52, side: THREE.DoubleSide });
-  const wallMotifs = new THREE.InstancedMesh(motifGeometry, motifMaterial, 48);
-  const motifDummy = new THREE.Object3D();
-  let motifIndex = 0;
-  for (const side of [-1, 1]) for (const z of [-22.0, -25.0, -28.0, -31.0, -34.0, -37.0]) {
-    for (const y of [2.0, 4.25, 6.5]) {
-      if (motifIndex >= 48) break;
-      motifDummy.position.set(side * 9.79, y, z);
-      motifDummy.rotation.y = side < 0 ? Math.PI / 2 : -Math.PI / 2;
-      motifDummy.scale.setScalar(0.78);
-      motifDummy.updateMatrix(); wallMotifs.setMatrixAt(motifIndex++, motifDummy.matrix);
-    }
-  }
-  wallMotifs.count = motifIndex;
-  wallMotifs.instanceMatrix.needsUpdate = true;
-  scene.add(wallMotifs);
-  
-  // A central brass chandelier silhouette and hanging lanterns add a human scale to the vault.
-  const chandelier = new THREE.Group();
-  const chain = new THREE.Mesh(new THREE.CylinderGeometry(0.025, 0.025, 1.0, 8), hallGold);
-  chain.position.y = 7.35; chandelier.add(chain);
-  const ring = new THREE.Mesh(new THREE.TorusGeometry(1.18, 0.055, 8, 48), hallGold);
-  ring.rotation.x = Math.PI / 2; ring.position.y = 6.72; chandelier.add(ring);
-  for (let i = 0; i < 12; i++) {
-    const a = (i / 12) * Math.PI * 2;
-    const arm = new THREE.Mesh(new THREE.CylinderGeometry(0.025, 0.035, 0.92, 8), hallGold);
-    arm.position.set(Math.cos(a) * 0.9, 6.72, Math.sin(a) * 0.9);
-    arm.rotation.z = Math.cos(a) * 0.72;
-    arm.rotation.x = Math.sin(a) * 0.72;
-    chandelier.add(arm);
-    const lamp = new THREE.Mesh(new THREE.OctahedronGeometry(0.16, 1), hallGlow);
-    lamp.position.set(Math.cos(a) * 1.18, 6.58, Math.sin(a) * 1.18);
-    chandelier.add(lamp);
-  }
-  chandelier.position.set(0, 0, -27.2);
-  scene.add(chandelier);
-  
-  // Fine gold inlay around the mihrab, plus a raised central niche medallion.
-  for (const width of [5.05, 4.72]) {
-    const inlay = new THREE.Mesh(new THREE.TorusGeometry(width / 2, 0.035, 8, 64, Math.PI), hallGold);
-    inlay.position.set(0, 3.2, -39.0);
-    inlay.scale.y = 1.3;
-    scene.add(inlay);
-  }
-  const mihrabMedallion = new THREE.Mesh(new THREE.OctahedronGeometry(0.38, 1), hallGold);
-  mihrabMedallion.position.set(0, 5.85, -39.0);
-  mihrabMedallion.scale.set(1, 1.25, 0.22);
-  scene.add(mihrabMedallion);
-  
-  // A simple patterned border at the entrance makes the transition from courtyard to hall legible.
-  for (const x of [-4.3, 4.3]) {
-    const pilaster = new THREE.Mesh(new THREE.BoxGeometry(0.22, 5.2, 0.28), hallGold);
-    pilaster.position.set(x, 2.6, -12.28);
-    scene.add(pilaster);
-  }
-  
+  // Lightweight fallback: replaced at runtime when the CC0 GLB hall loads successfully.
+  const fallbackHall = new THREE.Group();
+  fallbackHall.name = 'noor-hall-fallback';
+  const fallbackIvory = new THREE.MeshStandardMaterial({ color: 0xf0eee8, roughness: 0.55 });
+  const fallbackGold = new THREE.MeshStandardMaterial({ color: 0xb89a61, metalness: 0.35, roughness: 0.42 });
+  const fallbackFloor = new THREE.Mesh(new THREE.PlaneGeometry(18, 25), fallbackIvory);
+  fallbackFloor.rotation.x = -Math.PI / 2;
+  fallbackFloor.position.set(0, -0.035, -27.5);
+  fallbackHall.add(fallbackFloor);
+  const fallbackWall = (w: number, h: number, d: number, x: number, y: number, z: number) => {
+    const mesh = new THREE.Mesh(new THREE.BoxGeometry(w, h, d), fallbackIvory);
+    mesh.position.set(x, y, z);
+    fallbackHall.add(mesh);
+  };
+  fallbackWall(0.3, 4.5, 25, -9.1, 2.25, -27.5);
+  fallbackWall(0.3, 4.5, 25, 9.1, 2.25, -27.5);
+  fallbackWall(18, 4.5, 0.3, 0, 2.25, -39.85);
+  const fallbackNiche = new THREE.Mesh(new THREE.BoxGeometry(3.4, 3.8, 0.16), materials.dark);
+  fallbackNiche.position.set(0, 1.95, -39.63);
+  fallbackHall.add(fallbackNiche);
+  const fallbackArch = new THREE.Mesh(new THREE.TorusGeometry(1.75, 0.09, 10, 48, Math.PI), fallbackGold);
+  fallbackArch.position.set(0, 3.75, -39.48);
+  fallbackHall.add(fallbackArch);
+  scene.add(fallbackHall);
+
   // Two slender minarets frame the dome and give the courtyard a recognisable skyline.
   for (const x of [-8.3, 8.3]) {
     const shaft = new THREE.Mesh(new THREE.CylinderGeometry(0.48, 0.68, 7.7, 16), materials.stone);

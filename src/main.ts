@@ -278,8 +278,7 @@ function animate() {
   renderer.render(scene, camera);
   requestAnimationFrame(animate);
 }
-loadAssetPrayerHall(scene).finally(() => {
-  animate();
-  loading.remove();
-  window.setTimeout(() => { hint.style.opacity = '0'; }, 6500);
-});
+animate();
+void loadAssetPrayerHall(scene);
+loading.remove();
+window.setTimeout(() => { hint.style.opacity = '0'; }, 6500);

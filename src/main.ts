@@ -7,6 +7,8 @@ const app = document.querySelector<HTMLDivElement>('#app')!;
 const loading = document.querySelector<HTMLDivElement>('#loading')!;
 const hint = document.querySelector<HTMLDivElement>('#hint')!;
 const resetButton = document.querySelector<HTMLButtonElement>('#reset-camera')!;
+const lookButton = document.querySelector<HTMLButtonElement>('#look-mode')!;
+const walkButton = document.querySelector<HTMLButtonElement>('#walk-mode')!;
 const greetButton = document.querySelector<HTMLButtonElement>('#greet-action')!;
 const pauseButton = document.querySelector<HTMLButtonElement>('#pause-action')!;
 const presenceNote = document.querySelector<HTMLDivElement>('#presence-note')!;
@@ -115,6 +117,8 @@ let paused = false;
 let angle = 0;
 let distance = 8.5;
 let cameraHeight = 4.2;
+let controlMode: 'look' | 'walk' = 'look';
+let lastLookPoint = { x: 0, y: 0 };
 const lookTarget = new THREE.Vector3();
 const pointers = new Map<number, { x: number; y: number }>();
 const steeringDirection = new THREE.Vector3();
@@ -151,6 +155,7 @@ renderer.domElement.addEventListener('pointerdown', (event) => {
   pointers.set(event.pointerId, { x: event.clientX, y: event.clientY });
   if (pointers.size === 1) {
     gestureStart = { x: event.clientX, y: event.clientY };
+    lastLookPoint = { x: event.clientX, y: event.clientY };
     steeringActive = false;
   } else if (pointers.size === 2) {
     steeringActive = false;
@@ -165,7 +170,14 @@ renderer.domElement.addEventListener('pointermove', (event) => {
   if (pointers.size === 1) {
     const steerX = event.clientX - gestureStart.x;
     const steerY = event.clientY - gestureStart.y;
-    if (Math.hypot(steerX, steerY) > 12) {
+    if (controlMode === 'look') {
+      const lookX = event.clientX - lastLookPoint.x;
+      const lookY = event.clientY - lastLookPoint.y;
+      angle -= lookX * 0.006;
+      cameraHeight = THREE.MathUtils.clamp(cameraHeight + lookY * 0.008, 2.8, 7);
+      lastLookPoint = { x: event.clientX, y: event.clientY };
+      steeringActive = false;
+    } else if (Math.hypot(steerX, steerY) > 12) {
       camera.getWorldDirection(cameraForward);
       cameraForward.y = 0;
       cameraForward.normalize();
@@ -194,6 +206,7 @@ function endPointer(event: PointerEvent) {
     pinchStart = 0;
   } else if (pointers.size === 1) {
     gestureStart = { ...[...pointers.values()][0] };
+    lastLookPoint = { ...gestureStart };
     steeringActive = false;
     pinchStart = 0;
   }
@@ -204,6 +217,20 @@ renderer.domElement.addEventListener('wheel', (event) => {
   distance = THREE.MathUtils.clamp(distance + event.deltaY * 0.008, 5.5, 15);
 }, { passive: true });
 resetButton.addEventListener('click', () => { angle = 0; distance = 8.5; cameraHeight = 4.2; });
+function setControlMode(mode: 'look' | 'walk') {
+  controlMode = mode;
+  steeringActive = false;
+  steeringDirection.set(0, 0, 0);
+  lookButton.setAttribute('aria-pressed', String(mode === 'look'));
+  walkButton.setAttribute('aria-pressed', String(mode === 'walk'));
+  hint.textContent = mode === 'look'
+    ? 'Trascina per guardarti intorno · Due dita per zoomare'
+    : 'Tieni premuto e trascina per camminare · Due dita per guardarti intorno e zoomare';
+  hint.style.opacity = '1';
+}
+lookButton.addEventListener('click', () => setControlMode('look'));
+walkButton.addEventListener('click', () => setControlMode('walk'));
+setControlMode('look');
 greetButton.addEventListener('click', () => {
   gesture = 'greet';
   gestureStarted = clock.elapsedTime;
@@ -219,7 +246,7 @@ pauseButton.addEventListener('click', () => {
     gesture = 'none';
     presenceNote.textContent = 'Puoi restare qui quanto desideri.';
   } else {
-    presenceNote.textContent = 'Tieni premuto e sposta il dito per camminare.';
+    presenceNote.textContent = controlMode === 'look' ? 'Trascina sullo schermo per osservare lo spazio.' : 'Tieni premuto e sposta il dito per camminare.';
   }
 });
 

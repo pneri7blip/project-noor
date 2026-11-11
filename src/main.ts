@@ -1,6 +1,7 @@
 import * as THREE from 'three';
-import { createArchitecture } from './scene/architecture';
+import { createArchitecture, createArchitectureMaterials } from './scene/architecture';
 import { loadAssetPrayerHall } from './scene/asset-hall';
+import { loadAssetMosqueEnvironment } from './scene/asset-mosque-environment';
 import './style.css';
 
 const app = document.querySelector<HTMLDivElement>('#app')!;
@@ -12,6 +13,7 @@ const joystickKnob = document.querySelector<HTMLDivElement>('#joystick-knob')!;
 const greetButton = document.querySelector<HTMLButtonElement>('#greet-action')!;
 const pauseButton = document.querySelector<HTMLButtonElement>('#pause-action')!;
 const presenceNote = document.querySelector<HTMLDivElement>('#presence-note')!;
+const useMosquePreview = new URLSearchParams(window.location.search).get('environment') === 'mosque';
 
 const scene = new THREE.Scene();
 scene.background = new THREE.Color(0xc9c4b4);
@@ -31,7 +33,7 @@ const sun = new THREE.DirectionalLight(0xffdfb0, 2.7);
 sun.position.set(-8, 14, 7);
 scene.add(sun);
 
-const materials = createArchitecture(scene);
+const materials = useMosquePreview ? createArchitectureMaterials() : createArchitecture(scene);
 
 // Procedural humanoid with articulated limbs and a lightweight walk cycle.
 // The rig is built from reusable smooth meshes so it needs no external model download.
@@ -309,6 +311,16 @@ function animate() {
   requestAnimationFrame(animate);
 }
 animate();
-void loadAssetPrayerHall(scene);
-loading.remove();
+if (useMosquePreview) {
+  void loadAssetMosqueEnvironment(scene).then((loaded) => {
+    if (!loaded) {
+      createArchitecture(scene);
+      void loadAssetPrayerHall(scene);
+    }
+    loading.remove();
+  });
+} else {
+  void loadAssetPrayerHall(scene);
+  loading.remove();
+}
 window.setTimeout(() => { hint.style.opacity = '0'; }, 6500);

@@ -27,3 +27,12 @@ canvas { display: block; width: 100%; height: 100%; touch-action: none; }
   .action-button { min-width: 82px; padding: 9px 12px; }
 }
 
+
+
+#mode-switch { position: absolute; top: max(76px, calc(env(safe-area-inset-top) + 68px)); left: 50%; transform: translateX(-50%); display: flex; gap: 4px; padding: 4px; border: 1px solid #ffffff35; border-radius: 24px; background: rgb(25 36 30 / 76%); box-shadow: 0 8px 24px #101a1655; backdrop-filter: blur(14px); }
+.mode-button { min-width: 104px; padding: 10px 15px; border: 1px solid transparent; border-radius: 20px; color: #f6efdf; background: transparent; font: inherit; font-size: 12px; cursor: pointer; -webkit-tap-highlight-color: transparent; }
+.mode-button[aria-pressed="true"] { color: #fff9ed; border-color: #d9bd8b99; background: #b69a6855; box-shadow: inset 0 0 0 1px #d9bd8b22; }
+.mode-button span { margin-right: 6px; color: #dfc795; }
+@media (orientation: landscape) {
+  #mode-switch { top: max(14px, env(safe-area-inset-top)); left: 50%; }
+}

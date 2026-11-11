@@ -7,8 +7,8 @@ const app = document.querySelector<HTMLDivElement>('#app')!;
 const loading = document.querySelector<HTMLDivElement>('#loading')!;
 const hint = document.querySelector<HTMLDivElement>('#hint')!;
 const resetButton = document.querySelector<HTMLButtonElement>('#reset-camera')!;
-const lookButton = document.querySelector<HTMLButtonElement>('#look-mode')!;
-const walkButton = document.querySelector<HTMLButtonElement>('#walk-mode')!;
+const joystick = document.querySelector<HTMLDivElement>('#joystick')!;
+const joystickKnob = document.querySelector<HTMLDivElement>('#joystick-knob')!;
 const greetButton = document.querySelector<HTMLButtonElement>('#greet-action')!;
 const pauseButton = document.querySelector<HTMLButtonElement>('#pause-action')!;
 const presenceNote = document.querySelector<HTMLDivElement>('#presence-note')!;
@@ -117,13 +117,13 @@ let paused = false;
 let angle = 0;
 let distance = 8.5;
 let cameraHeight = 4.2;
-let controlMode: 'look' | 'walk' = 'look';
-let lastLookPoint = { x: 0, y: 0 };
+let joystickPointer: number | null = null;
+let joystickAxes = { x: 0, y: 0 };
+let lastCameraPoint = { x: 0, y: 0 };
 const lookTarget = new THREE.Vector3();
 const pointers = new Map<number, { x: number; y: number }>();
 const steeringDirection = new THREE.Vector3();
 let steeringActive = false;
-let gestureStart = { x: 0, y: 0 };
 let pinchStart = 0;
 let pinchDistance = 0;
 let lastTwoFingerCenter = { x: 0, y: 0 };
@@ -154,8 +154,7 @@ renderer.domElement.addEventListener('pointerdown', (event) => {
   renderer.domElement.setPointerCapture(event.pointerId);
   pointers.set(event.pointerId, { x: event.clientX, y: event.clientY });
   if (pointers.size === 1) {
-    gestureStart = { x: event.clientX, y: event.clientY };
-    lastLookPoint = { x: event.clientX, y: event.clientY };
+    lastCameraPoint = { x: event.clientX, y: event.clientY };
     steeringActive = false;
   } else if (pointers.size === 2) {
     steeringActive = false;
@@ -168,26 +167,11 @@ renderer.domElement.addEventListener('pointermove', (event) => {
   if (!pointers.has(event.pointerId)) return;
   pointers.set(event.pointerId, { x: event.clientX, y: event.clientY });
   if (pointers.size === 1) {
-    const steerX = event.clientX - gestureStart.x;
-    const steerY = event.clientY - gestureStart.y;
-    if (controlMode === 'look') {
-      const lookX = event.clientX - lastLookPoint.x;
-      const lookY = event.clientY - lastLookPoint.y;
-      angle -= lookX * 0.006;
-      cameraHeight = THREE.MathUtils.clamp(cameraHeight + lookY * 0.008, 2.8, 7);
-      lastLookPoint = { x: event.clientX, y: event.clientY };
-      steeringActive = false;
-    } else if (Math.hypot(steerX, steerY) > 12) {
-      camera.getWorldDirection(cameraForward);
-      cameraForward.y = 0;
-      cameraForward.normalize();
-      cameraRight.crossVectors(cameraForward, worldUp).normalize();
-      steeringDirection.copy(cameraRight).multiplyScalar(steerX)
-        .addScaledVector(cameraForward, -steerY).normalize();
-      steeringActive = true;
-    } else {
-      steeringActive = false;
-    }
+    const lookX = event.clientX - lastCameraPoint.x;
+    const lookY = event.clientY - lastCameraPoint.y;
+    angle -= lookX * 0.006;
+    cameraHeight = THREE.MathUtils.clamp(cameraHeight + lookY * 0.008, 2.8, 7);
+    lastCameraPoint = { x: event.clientX, y: event.clientY };
   } else if (pointers.size === 2) {
     const currentGap = gap();
     if (pinchStart > 0) distance = THREE.MathUtils.clamp(pinchDistance * pinchStart / Math.max(1, currentGap), 5.5, 15);
@@ -205,9 +189,8 @@ function endPointer(event: PointerEvent) {
     steeringDirection.set(0, 0, 0);
     pinchStart = 0;
   } else if (pointers.size === 1) {
-    gestureStart = { ...[...pointers.values()][0] };
-    lastLookPoint = { ...gestureStart };
-    steeringActive = false;
+    lastCameraPoint = { ...[...pointers.values()][0] };
+    steeringActive = joystickPointer !== null && Math.hypot(joystickAxes.x, joystickAxes.y) > 0.12;
     pinchStart = 0;
   }
 }
@@ -217,20 +200,35 @@ renderer.domElement.addEventListener('wheel', (event) => {
   distance = THREE.MathUtils.clamp(distance + event.deltaY * 0.008, 5.5, 15);
 }, { passive: true });
 resetButton.addEventListener('click', () => { angle = 0; distance = 8.5; cameraHeight = 4.2; });
-function setControlMode(mode: 'look' | 'walk') {
-  controlMode = mode;
-  steeringActive = false;
-  steeringDirection.set(0, 0, 0);
-  lookButton.setAttribute('aria-pressed', String(mode === 'look'));
-  walkButton.setAttribute('aria-pressed', String(mode === 'walk'));
-  hint.textContent = mode === 'look'
-    ? 'Trascina per guardarti intorno · Due dita per zoomare'
-    : 'Tieni premuto e trascina per camminare · Due dita per guardarti intorno e zoomare';
-  hint.style.opacity = '1';
+function updateJoystick(event: PointerEvent) {
+  const rect = joystick.getBoundingClientRect();
+  const radius = rect.width * 0.36;
+  const dx = event.clientX - (rect.left + rect.width / 2);
+  const dy = event.clientY - (rect.top + rect.height / 2);
+  const length = Math.hypot(dx, dy);
+  const scale = length > radius ? radius / length : 1;
+  const x = dx * scale, y = dy * scale;
+  joystickAxes = { x: x / radius, y: y / radius };
+  joystickKnob.style.transform = `translate(${x}px, ${y}px)`;
 }
-lookButton.addEventListener('click', () => setControlMode('look'));
-walkButton.addEventListener('click', () => setControlMode('walk'));
-setControlMode('look');
+joystick.addEventListener('pointerdown', (event) => {
+  event.preventDefault(); event.stopPropagation();
+  joystickPointer = event.pointerId;
+  joystick.setPointerCapture(event.pointerId);
+  updateJoystick(event);
+});
+joystick.addEventListener('pointermove', (event) => {
+  if (event.pointerId !== joystickPointer) return;
+  event.preventDefault(); updateJoystick(event);
+});
+function releaseJoystick(event: PointerEvent) {
+  if (event.pointerId !== joystickPointer) return;
+  joystickPointer = null; joystickAxes = { x: 0, y: 0 };
+  joystickKnob.style.transform = 'translate(0px, 0px)';
+  steeringActive = false; steeringDirection.set(0, 0, 0);
+}
+joystick.addEventListener('pointerup', releaseJoystick);
+joystick.addEventListener('pointercancel', releaseJoystick);
 greetButton.addEventListener('click', () => {
   gesture = 'greet';
   gestureStarted = clock.elapsedTime;
@@ -246,7 +244,7 @@ pauseButton.addEventListener('click', () => {
     gesture = 'none';
     presenceNote.textContent = 'Puoi restare qui quanto desideri.';
   } else {
-    presenceNote.textContent = controlMode === 'look' ? 'Trascina sullo schermo per osservare lo spazio.' : 'Tieni premuto e sposta il dito per camminare.';
+    presenceNote.textContent = 'Muovi il joystick per camminare, trascina lo schermo per guardarti intorno.';
   }
 });
 
@@ -263,7 +261,12 @@ resize();
 function animate() {
   const dt = Math.min(clock.getDelta(), 0.05);
   const elapsed = clock.elapsedTime;
-  const delta = steeringDirection.clone();
+  camera.getWorldDirection(cameraForward);
+  cameraForward.y = 0; cameraForward.normalize();
+  cameraRight.crossVectors(cameraForward, worldUp).normalize();
+  steeringDirection.copy(cameraRight).multiplyScalar(joystickAxes.x).addScaledVector(cameraForward, -joystickAxes.y);
+  steeringActive = joystickPointer !== null && Math.hypot(joystickAxes.x, joystickAxes.y) > 0.12;
+  const delta = steeringDirection.clone().normalize();
   const moving = steeringActive && steeringDirection.lengthSq() > 0.01 && !paused;
 
   if (moving) {

@@ -7,11 +7,11 @@
 
 ## 1. Objective
 
-Deliver a browser-based 3D courtyard that opens on Android without registration. A first-time visitor must be able to explore it using the same three mobile gestures observed directly in Sansa:
+Deliver a browser-based 3D courtyard that opens on Android without registration. A first-time visitor must be able to explore it using the approved mobile gesture contract:
 
-1. Tap the ground to move the avatar.
-2. Drag one finger to rotate the camera.
-3. Pinch with two fingers to zoom in or out.
+1. Hold and drag one finger to steer the avatar continuously in the chosen direction.
+2. Release the finger to stop the avatar immediately.
+3. Use two fingers to orbit/pan the camera and pinch to zoom in or out.
 
 There must be no on-screen joystick.
 
@@ -65,32 +65,25 @@ Use simple geometry and placeholder materials first. Do not spend time producing
 
 ## 5. Mobile controls
 
-### Tap to move
+### One-finger steering
 
-- Raycast the tap position onto the walkable ground.
-- Move the avatar toward that point.
-- Ignore taps on interface controls and non-walkable objects.
-- Use a short gesture threshold to distinguish a tap from a camera drag.
-- Stop at the destination; no pathfinding is required in this prototype.
-- Do not display a joystick.
+- A single finger held and dragged steers the avatar continuously in the direction indicated by the drag.
+- Movement continues while the finger is held; releasing it stops movement immediately.
+- Convert the drag direction relative to the camera's forward/right axes so controls remain intuitive as the camera turns.
+- A short movement threshold prevents accidental movement from a stationary touch.
+- Do not display a virtual joystick.
 
-### Drag to rotate
+### Two-finger camera control
 
-- A one-finger drag rotates the third-person camera around the avatar.
-- A drag must not also trigger movement.
-- Keep camera sensitivity moderate and avoid sudden jumps.
-
-### Pinch to zoom
-
-- Two-finger pinch adjusts camera distance.
-- Clamp zoom to sensible minimum and maximum distances.
-- Pinch must not move the avatar or rotate the camera unexpectedly.
+- Two fingers orbit the camera horizontally and adjust its vertical viewing angle.
+- Pinch distance adjusts camera zoom.
+- Clamp orbit height and zoom to sensible limits.
+- Two-finger gestures must never steer the avatar.
 
 ### Desktop fallback
 
-- Mouse click on ground moves the avatar.
-- Mouse drag rotates the camera.
 - Mouse wheel zooms.
+- Desktop steering/orbit controls may be added separately, but must not compromise the mobile interaction contract.
 - Keyboard WASD may be included for development convenience, but it must not complicate the mobile interaction model.
 
 ## 6. Camera and movement
@@ -120,7 +113,7 @@ Do not claim that a device passes performance acceptance until it has been teste
 
 ## 8. Accessibility and user experience
 
-- No mandatory tutorial. A brief, dismissible hint may say: “Tap to move · Drag to look · Pinch to zoom”.
+- No mandatory tutorial. A brief, dismissible hint may say: “Hold and drag to walk · Two fingers to look and zoom”.
 - Controls must not cover the main architectural focal point.
 - No audio autoplay. If ambient audio is added, it must be user-controlled and off by default.
 - Respect reduced-motion preferences where practical.
@@ -128,7 +121,7 @@ Do not claim that a device passes performance acceptance until it has been teste
 
 ## 9. Initial implementation status
 
-The repository now contains an initial implementation in `src/main.ts`, `src/style.css`, `index.html`, and the Vite/TypeScript configuration. It includes a procedural courtyard blockout, a mosque-inspired landmark, garden placeholders, a simple temporary avatar, tap-to-move, one-finger camera orbit, pinch zoom, mouse fallback, and a reset-camera control.
+The repository now contains an initial implementation in `src/main.ts`, `src/style.css`, `index.html`, and the Vite/TypeScript configuration. It includes a procedural architectural environment, a prayer hall asset-loading path with a fallback hall, a temporary articulated avatar, continuous one-finger steering, two-finger camera orbit/vertical adjustment and pinch zoom, plus reset-camera and bottom action controls.
 
 This is an unbuilt, unverified first code increment. No claim is made that it compiles, deploys, or works on the Motorola until those checks have actually been run. The avatar is a primitive placeholder, not a finished humanoid model.
 
@@ -138,9 +131,9 @@ Implement in small, testable increments:
 
 1. **Scene shell:** Vite + TypeScript + Three.js, responsive canvas, loading/error handling.
 2. **Environment blockout:** ground, courtyard boundaries, simple mosque landmark, garden placeholders.
-3. **Avatar and tap movement:** one avatar moves to a tapped ground position.
-4. **Camera gestures:** one-finger drag rotates; two-finger pinch zooms; gesture conflicts are resolved.
-5. **Desktop fallback:** mouse controls and optional keyboard movement.
+3. **Avatar and steering:** one avatar moves continuously while the user holds and drags one finger; release stops it.
+4. **Camera gestures:** two-finger drag orbits/pans; pinch zooms; gesture conflicts are resolved.
+5. **Desktop fallback:** add suitable desktop controls without changing mobile behavior.
 6. **Android validation:** test on the actual moto g71 5G; fix touch conflicts, loading, and performance.
 7. **Visual polish:** improve materials, lighting, foliage, and avatar only after the interaction and performance baseline works.
 
@@ -154,9 +147,10 @@ Prototype 01 is ready for review when all are true:
 - [ ] No registration or installation required.
 - [ ] Courtyard and mosque-inspired landmark are visible.
 - [ ] Avatar is visible at the starting point.
-- [ ] Tap on walkable ground moves the avatar.
-- [ ] One-finger drag rotates the camera without moving the avatar.
-- [ ] Two-finger pinch zooms without moving the avatar.
+- [ ] Holding and dragging one finger steers the avatar continuously.
+- [ ] Releasing the finger stops the avatar immediately.
+- [ ] Two-finger drag orbits/pans the camera without steering the avatar.
+- [ ] Two-finger pinch zooms without steering the avatar.
 - [ ] No virtual joystick appears.
 - [ ] Interface remains usable in portrait and landscape.
 - [ ] No persistent runtime errors.

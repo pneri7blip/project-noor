@@ -1,7 +1,5 @@
 import * as THREE from 'three';
-import { createArchitecture, createArchitectureMaterials } from './scene/architecture';
-import { loadAssetPrayerHall } from './scene/asset-hall';
-import { loadAssetMosqueEnvironment } from './scene/asset-mosque-environment';
+import { createNoorWorld } from './scene/noor-world';
 import './style.css';
 
 const app = document.querySelector<HTMLDivElement>('#app')!;
@@ -13,27 +11,26 @@ const joystickKnob = document.querySelector<HTMLDivElement>('#joystick-knob')!;
 const greetButton = document.querySelector<HTMLButtonElement>('#greet-action')!;
 const pauseButton = document.querySelector<HTMLButtonElement>('#pause-action')!;
 const presenceNote = document.querySelector<HTMLDivElement>('#presence-note')!;
-const useMosquePreview = new URLSearchParams(window.location.search).get('environment') === 'mosque';
 
 const scene = new THREE.Scene();
-scene.background = new THREE.Color(0xc9c4b4);
-scene.fog = new THREE.Fog(0xc9c4b4, 34, 72);
+scene.background = new THREE.Color(0xd8e4e8);
+scene.fog = new THREE.Fog(0xd8e4e8, 68, 132);
 
 const camera = new THREE.PerspectiveCamera(48, 1, 0.1, 100);
 const renderer = new THREE.WebGLRenderer({ antialias: true, powerPreference: 'high-performance' });
 renderer.setPixelRatio(Math.min(window.devicePixelRatio, 1.5));
 renderer.shadowMap.enabled = false;
 renderer.toneMapping = THREE.ACESFilmicToneMapping;
-renderer.toneMappingExposure = 1.12;
+renderer.toneMappingExposure = 1.22;
 renderer.outputColorSpace = THREE.SRGBColorSpace;
 app.prepend(renderer.domElement);
 
-scene.add(new THREE.HemisphereLight(0xfff1d8, 0x6c7764, 1.8));
-const sun = new THREE.DirectionalLight(0xffdfb0, 2.7);
-sun.position.set(-8, 14, 7);
+scene.add(new THREE.HemisphereLight(0xf4f7ff, 0x7b827b, 2.0));
+const sun = new THREE.DirectionalLight(0xfff0d7, 3.1);
+sun.position.set(-18, 28, 12);
 scene.add(sun);
 
-const materials = useMosquePreview ? createArchitectureMaterials() : createArchitecture(scene);
+const materials = createNoorWorld(scene);
 
 // Procedural humanoid with articulated limbs and a lightweight walk cycle.
 // The rig is built from reusable smooth meshes so it needs no external model download.
@@ -311,16 +308,5 @@ function animate() {
   requestAnimationFrame(animate);
 }
 animate();
-if (useMosquePreview) {
-  void loadAssetMosqueEnvironment(scene).then((loaded) => {
-    if (!loaded) {
-      createArchitecture(scene);
-      void loadAssetPrayerHall(scene);
-    }
-    loading.remove();
-  });
-} else {
-  void loadAssetPrayerHall(scene);
-  loading.remove();
-}
+loading.remove();
 window.setTimeout(() => { hint.style.opacity = '0'; }, 6500);

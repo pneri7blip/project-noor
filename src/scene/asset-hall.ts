@@ -200,6 +200,11 @@ export async function loadAssetPrayerHall(scene: THREE.Scene): Promise<boolean> 
     const ivory = new THREE.MeshStandardMaterial({ color: 0xf1eee5, roughness: 0.38 });
     const deepGreen = new THREE.MeshStandardMaterial({ color: 0x123b34, roughness: 0.88 });
     const warmGlass = new THREE.MeshStandardMaterial({ color: 0xf3d9a1, emissive: 0xd69a4d, emissiveIntensity: 0.75, roughness: 0.28 });
+    const windowGlass = new THREE.MeshStandardMaterial({
+      color: 0x315e58, roughness: 0.24, metalness: 0.12,
+      emissive: 0x183a35, emissiveIntensity: 0.22, side: THREE.DoubleSide,
+    });
+    const windowFrame = new THREE.MeshStandardMaterial({ color: 0xc5a66b, metalness: 0.58, roughness: 0.34 });
 
     const addHallBox = (w: number, h: number, d: number, x: number, y: number, z: number, material: THREE.Material) => {
       const mesh = new THREE.Mesh(new THREE.BoxGeometry(w, h, d), material);
@@ -226,6 +231,49 @@ export async function loadAssetPrayerHall(scene: THREE.Scene): Promise<boolean> 
       }
     }
 
+    // Tall recessed-looking window bays bring filtered daylight into the prayer hall.
+    // The inset glass and nested pointed frames create depth without expensive real-time lights.
+    for (const side of [-1, 1]) {
+      for (const z of [-22.0, -29.0, -36.0]) {
+        const glass = new THREE.Mesh(new THREE.PlaneGeometry(1.42, 2.7), windowGlass);
+        glass.rotation.y = side < 0 ? Math.PI / 2 : -Math.PI / 2;
+        glass.position.set(side * 8.925, 2.62, z);
+        hall.add(glass);
+
+        const archPoints = [
+          new THREE.Vector3(side * 8.91, 1.18, z - 0.73),
+          new THREE.Vector3(side * 8.91, 2.9, z - 0.73),
+          new THREE.Vector3(side * 8.91, 3.55, z - 0.42),
+          new THREE.Vector3(side * 8.91, 4.12, z),
+          new THREE.Vector3(side * 8.91, 3.55, z + 0.42),
+          new THREE.Vector3(side * 8.91, 2.9, z + 0.73),
+          new THREE.Vector3(side * 8.91, 1.18, z + 0.73),
+        ];
+        const outer = new THREE.CatmullRomCurve3(archPoints);
+        hall.add(new THREE.Mesh(new THREE.TubeGeometry(outer, 40, 0.075, 8, false), windowFrame));
+        const innerPoints = archPoints.map((point) => new THREE.Vector3(
+          point.x + side * 0.012,
+          point.y - (point.y > 3.5 ? 0.12 : 0),
+          z + (point.z - z) * 0.82,
+        ));
+        hall.add(new THREE.Mesh(
+          new THREE.TubeGeometry(new THREE.CatmullRomCurve3(innerPoints), 40, 0.025, 6, false),
+          ivory,
+        ));
+
+        // Delicate vertical and horizontal divisions recall traditional mashrabiya screens.
+        for (const offset of [-0.34, 0, 0.34]) {
+          const mullion = new THREE.Mesh(new THREE.BoxGeometry(0.035, 2.25, 0.035), windowFrame);
+          mullion.position.set(side * 8.89, 2.55, z + offset);
+          hall.add(mullion);
+        }
+        const crossbar = new THREE.Mesh(new THREE.BoxGeometry(0.04, 0.035, 1.35), windowFrame);
+        crossbar.position.set(side * 8.89, 2.42, z);
+        hall.add(crossbar);
+        addHallBox(0.08, 0.12, 1.68, side * 8.88, 1.12, z, cornice);
+      }
+    }
+
     // Pointed transverse arches give the hall its scale and a recognisable rhythm.
     for (let row = 0; row < 5; row++) {
       const z = -18.1 - row * 4.9;
@@ -242,6 +290,26 @@ export async function loadAssetPrayerHall(scene: THREE.Scene): Promise<boolean> 
       const innerCurve = curve.clone();
       hall.add(new THREE.Mesh(new THREE.TubeGeometry(innerCurve, 64, 0.027, 8, false), cornice));
       addHallBox(16.1, 0.07, 0.08, 0, 6.22, z, cornice);
+    }
+
+    // Restrained eight-point ceiling medallions sit inside selected coffers.
+    const rosetteShape = new THREE.Shape();
+    for (let i = 0; i < 16; i++) {
+      const angle = (i / 16) * Math.PI * 2;
+      const radius = i % 2 === 0 ? 0.34 : 0.16;
+      const px = Math.cos(angle) * radius;
+      const py = Math.sin(angle) * radius;
+      if (i === 0) rosetteShape.moveTo(px, py); else rosetteShape.lineTo(px, py);
+    }
+    rosetteShape.closePath();
+    const rosetteGeometry = new THREE.ShapeGeometry(rosetteShape);
+    for (const z of [-19.4, -28.4, -37.4]) {
+      for (const x of [-5.8, -2.0, 2.0, 5.8]) {
+        const rosette = new THREE.Mesh(rosetteGeometry, cornice);
+        rosette.rotation.x = -Math.PI / 2;
+        rosette.position.set(x, 6.515, z);
+        hall.add(rosette);
+      }
     }
 
     // Recessed coffer rhythm across the dark ceiling.

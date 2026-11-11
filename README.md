@@ -51,7 +51,7 @@ Project Noor is a digital environment for reflection and community. It does **no
 
 ## Current status
 
-**Stage:** single-user browser prototype running in Codespaces and opened on Android. Tap-to-move, camera orbit, pinch zoom, a procedural articulated avatar, and a basic walk cycle are implemented. The Sansa-inspired mobile action layer now adds a greeting gesture and pause control. The latest pull-request build and type-check passed; the post-merge main-branch workflow is running.  
+**Stage:** single-user browser-based 3D prototype. The current source implements continuous one-finger avatar steering, two-finger camera orbit/vertical adjustment and pinch zoom, a procedural articulated avatar, and a bottom action layer. The latest recorded main-branch build passed on 9 November 2026; the new visual-direction branch still requires its own CI run and Android device validation.  
 **Stack:** Three.js + TypeScript + Vite. This is Noor's current implementation, not a claim about Sansa's undisclosed stack.  
 **Next step:** replace the geometric blockout with properly licensed, optimized 3D assets and move toward a more convincing environment and rigged avatar; then validate Android performance.
 

@@ -20,10 +20,9 @@ function makeMarbleTexture() {
   return texture;
 }
 
-// Noor's courtyard architecture. The avatar, camera and touch controls live in main.ts.
-export function createArchitecture(scene: THREE.Scene) {
+function createMaterials() {
   const marble = makeMarbleTexture();
-  const materials = {
+  return {
     ground: new THREE.MeshStandardMaterial({ color: 0xffffff, map: marble, roughness: 0.43, metalness: 0.015 }),
     stone: new THREE.MeshStandardMaterial({ color: 0xf0ede5, map: marble, roughness: 0.5, metalness: 0.01 }),
     ivory: new THREE.MeshStandardMaterial({ color: 0xfaf8f2, map: marble, roughness: 0.34, metalness: 0.015 }),
@@ -34,6 +33,16 @@ export function createArchitecture(scene: THREE.Scene) {
     avatar: new THREE.MeshStandardMaterial({ color: 0x526d60, roughness: 0.9 }),
     skin: new THREE.MeshStandardMaterial({ color: 0xb98d6b, roughness: 1 }),
   };
+}
+
+// Material-only path for isolated environment previews; it creates no architecture.
+export function createArchitectureMaterials() {
+  return createMaterials();
+}
+
+// Noor's courtyard architecture. The avatar, camera and touch controls live in main.ts.
+export function createArchitecture(scene: THREE.Scene) {
+  const materials = createMaterials();
 
   const add = <T extends THREE.Object3D>(object: T, x = 0, y = 0, z = 0): T => {
     object.position.set(x, y, z);

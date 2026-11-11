@@ -185,7 +185,10 @@ export function createNoorWorld(scene: THREE.Scene): NoorMaterials {
   box(0.55,8.8,26,-11.0,4.4,-27,ivory);
   box(0.55,8.8,26,11.0,4.4,-27,ivory);
   box(22,8.8,0.55,0,4.4,-40,ivory);
-  box(22,0.35,26,0,9.0,-27,teal);
+  // The roof is intentionally open over the nave so the dome and daylight remain visible from inside.
+  box(22,0.24,0.45,0,8.82,-14.2,teal);
+  box(22,0.24,0.45,0,8.82,-39.8,teal);
+  for(const side of [-1,1]) box(0.45,0.24,25.8,side*10.78,8.82,-27,teal);
   for(const side of [-1,1]){
     for(const z of [-18,-23,-28,-33,-38]){
       column(side*8.6,z,8.1,0.28);
@@ -210,14 +213,14 @@ export function createNoorWorld(scene: THREE.Scene): NoorMaterials {
   // Central coffered ceiling and three suspended ring chandeliers.
   for(let z=-19;z>=-36;z-=5.5){
     for(const x of [-6,-2,2,6]){
-      box(3.45,0.06,3.5,x,8.78,z,teal);
-      box(3.4,0.045,0.055,x,8.72,z-1.7,goldSoft);
-      box(3.4,0.045,0.055,x,8.72,z+1.7,goldSoft);
+      box(3.45,0.06,3.5,x,8.72,z,teal);
+      box(3.4,0.045,0.055,x,8.68,z-1.7,goldSoft);
+      box(3.4,0.045,0.055,x,8.68,z+1.7,goldSoft);
       const medallion=addMesh(new THREE.ShapeGeometry((()=>{
         const s=new THREE.Shape();
         for(let i=0;i<16;i++){const a=i*Math.PI/8-Math.PI/2,r=i%2===0?0.58:0.28;const px=Math.cos(a)*r,py=Math.sin(a)*r;if(i===0)s.moveTo(px,py);else s.lineTo(px,py);}
         s.closePath();return s;
-      })()),goldSoft,x,8.73,z);
+      })()),goldSoft,x,8.69,z);
       medallion.rotation.x=0;
     }
   }

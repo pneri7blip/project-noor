@@ -43,6 +43,7 @@ The first prototype will focus on:
 - [3D Engine Decision](docs/ENGINE-DECISION.md)
 - [Technical Specification — Prototype 01](docs/TECHNICAL-SPEC-PROTOTYPE-01.md)
 - [Android Preview Workflow](docs/ANDROID-PREVIEW-WORKFLOW.md)
+- [Approved Visual Direction — Arabian Architecture](docs/VISUAL-DIRECTION.md)
 
 ## Important religious boundary
 

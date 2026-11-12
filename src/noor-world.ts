@@ -185,6 +185,8 @@ export function createNoorWorld(scene: THREE.Scene, palette: Palette) {
   torus(8.12, 0.16, gold, 0, 9.58, -18);
   const domeMaterial = ivory.clone();
   domeMaterial.side = THREE.DoubleSide;
+  const domeRibMaterial = gold.clone();
+  domeRibMaterial.side = THREE.DoubleSide;
   const dome = new THREE.Mesh(
     new THREE.SphereGeometry(8, 64, 40, 0, Math.PI * 2, 0, Math.PI / 2),
     domeMaterial,
@@ -200,7 +202,7 @@ export function createNoorWorld(scene: THREE.Scene, palette: Palette) {
       const r = 7.92 * Math.cos(t);
       points.push(new THREE.Vector3(Math.cos(a) * r, 9.58 + 7.92 * Math.sin(t), -18 + Math.sin(a) * r));
     }
-    const rib = new THREE.Mesh(new THREE.TubeGeometry(new THREE.CatmullRomCurve3(points), 32, 0.045, 6, false), gold);
+    const rib = new THREE.Mesh(new THREE.TubeGeometry(new THREE.CatmullRomCurve3(points), 32, 0.045, 6, false), domeRibMaterial);
     group.add(rib);
   }
   cylinder(0.23, 0.32, 0.62, gold, 0, 17.7, -18, 24);
@@ -211,7 +213,7 @@ export function createNoorWorld(scene: THREE.Scene, palette: Palette) {
   // Qibla wall and a deep, framed mihrab.
   box(8.5, 7.2, 0.65, ivory, 0, 3.6, -35.0);
   box(5.1, 6.1, 0.22, blush, 0, 3.2, -34.55);
-  pointedArch(0, -34.35, 4.5, 1.15, 5.6, gold, 0.16);
+  pointedArch(0, -34.02, 4.5, 1.15, 5.6, gold, 0.16);
   box(3.2, 0.22, 0.18, gold, 0, 1.0, -34.3);
   const mihrabInset = new THREE.Mesh(new THREE.PlaneGeometry(3.3, 4.4), dark);
   mihrabInset.position.set(0, 3.15, -34.2);
@@ -243,11 +245,12 @@ export function createNoorWorld(scene: THREE.Scene, palette: Palette) {
 
   // Decorative geometric medallions on the upper qibla wall.
   for (let x = -10; x <= 10; x += 2.5) {
+    const wallFace = Math.abs(x) <= 4.25 ? -34.63 : -35.08;
     const med = new THREE.Mesh(new THREE.CircleGeometry(0.42, 8), gold);
-    med.position.set(x, 7.1, -35.08);
+    med.position.set(x, 7.1, wallFace);
     group.add(med);
     const core = new THREE.Mesh(new THREE.CircleGeometry(0.27, 8), blush);
-    core.position.set(x, 7.1, -35.05);
+    core.position.set(x, 7.1, wallFace + 0.025);
     group.add(core);
   }
 

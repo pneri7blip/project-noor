@@ -1,7 +1,4 @@
 import * as THREE from 'three';
-import { createArchitecture, createArchitectureMaterials } from './scene/architecture';
-import { loadAssetPrayerHall } from './scene/asset-hall';
-import { loadAssetMosqueEnvironment } from './scene/asset-mosque-environment';
 import './style.css';
 
 const app = document.querySelector<HTMLDivElement>('#app')!;
@@ -13,11 +10,10 @@ const joystickKnob = document.querySelector<HTMLDivElement>('#joystick-knob')!;
 const greetButton = document.querySelector<HTMLButtonElement>('#greet-action')!;
 const pauseButton = document.querySelector<HTMLButtonElement>('#pause-action')!;
 const presenceNote = document.querySelector<HTMLDivElement>('#presence-note')!;
-const useMosquePreview = new URLSearchParams(window.location.search).get('environment') === 'mosque';
 
 const scene = new THREE.Scene();
-scene.background = new THREE.Color(0xc9c4b4);
-scene.fog = new THREE.Fog(0xc9c4b4, 34, 72);
+scene.background = new THREE.Color(0xe9e3da);
+scene.fog = new THREE.Fog(0xe9e3da, 48, 105);
 
 const camera = new THREE.PerspectiveCamera(48, 1, 0.1, 100);
 const renderer = new THREE.WebGLRenderer({ antialias: true, powerPreference: 'high-performance' });
@@ -28,12 +24,26 @@ renderer.toneMappingExposure = 1.12;
 renderer.outputColorSpace = THREE.SRGBColorSpace;
 app.prepend(renderer.domElement);
 
-scene.add(new THREE.HemisphereLight(0xfff1d8, 0x6c7764, 1.8));
-const sun = new THREE.DirectionalLight(0xffdfb0, 2.7);
-sun.position.set(-8, 14, 7);
+scene.add(new THREE.HemisphereLight(0xfff7ed, 0x8a8177, 1.65));
+const sun = new THREE.DirectionalLight(0xffead2, 2.1);
+sun.position.set(-8, 16, 8);
 scene.add(sun);
 
-const materials = useMosquePreview ? createArchitectureMaterials() : createArchitecture(scene);
+// Clean-slate test environment: only a neutral floor, no inherited mosque geometry.
+const materials = {
+  avatar: new THREE.MeshStandardMaterial({ color: 0x526d60, roughness: 0.9 }),
+  trim: new THREE.MeshStandardMaterial({ color: 0xb69a68, roughness: 0.42, metalness: 0.18 }),
+  skin: new THREE.MeshStandardMaterial({ color: 0xb98d6b, roughness: 1 }),
+  stone: new THREE.MeshStandardMaterial({ color: 0xe8dfd3, roughness: 0.82 }),
+  dark: new THREE.MeshStandardMaterial({ color: 0x35453f, roughness: 0.92 }),
+};
+const testFloor = new THREE.Mesh(
+  new THREE.PlaneGeometry(160, 160),
+  new THREE.MeshStandardMaterial({ color: 0xd8d0c4, roughness: 0.94 }),
+);
+testFloor.rotation.x = -Math.PI / 2;
+testFloor.position.y = -0.09;
+scene.add(testFloor);
 
 // Procedural humanoid with articulated limbs and a lightweight walk cycle.
 // The rig is built from reusable smooth meshes so it needs no external model download.
@@ -311,16 +321,5 @@ function animate() {
   requestAnimationFrame(animate);
 }
 animate();
-if (useMosquePreview) {
-  void loadAssetMosqueEnvironment(scene).then((loaded) => {
-    if (!loaded) {
-      createArchitecture(scene);
-      void loadAssetPrayerHall(scene);
-    }
-    loading.remove();
-  });
-} else {
-  void loadAssetPrayerHall(scene);
-  loading.remove();
-}
+loading.remove();
 window.setTimeout(() => { hint.style.opacity = '0'; }, 6500);

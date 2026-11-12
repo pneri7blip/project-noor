@@ -1,4 +1,5 @@
 import * as THREE from 'three';
+import { createNoorWorld } from './noor-world';
 import './style.css';
 
 const app = document.querySelector<HTMLDivElement>('#app')!;
@@ -37,13 +38,7 @@ const materials = {
   stone: new THREE.MeshStandardMaterial({ color: 0xe8dfd3, roughness: 0.82 }),
   dark: new THREE.MeshStandardMaterial({ color: 0x35453f, roughness: 0.92 }),
 };
-const testFloor = new THREE.Mesh(
-  new THREE.PlaneGeometry(160, 160),
-  new THREE.MeshStandardMaterial({ color: 0xd8d0c4, roughness: 0.94 }),
-);
-testFloor.rotation.x = -Math.PI / 2;
-testFloor.position.y = -0.09;
-scene.add(testFloor);
+createNoorWorld(scene, materials);
 
 // Procedural humanoid with articulated limbs and a lightweight walk cycle.
 // The rig is built from reusable smooth meshes so it needs no external model download.

@@ -14,7 +14,7 @@ function marbleTexture(): THREE.CanvasTexture {
   canvas.height = 512;
   const ctx = canvas.getContext('2d');
   if (!ctx) throw new Error('Canvas texture unavailable');
-  ctx.fillStyle = '#eeeDE7';
+  ctx.fillStyle = '#f1e8e0';
   ctx.fillRect(0, 0, 512, 512);
   for (let i = 0; i < 42; i++) {
     const x = (i * 137) % 600 - 40;
@@ -22,7 +22,7 @@ function marbleTexture(): THREE.CanvasTexture {
     ctx.beginPath();
     ctx.moveTo(x - 170, y - 95);
     ctx.bezierCurveTo(x - 65, y - 45, x + 40, y + 55, x + 190, y + 115);
-    ctx.strokeStyle = i % 5 === 0 ? 'rgba(153,157,153,.22)' : 'rgba(255,255,255,.65)';
+    ctx.strokeStyle = i % 5 === 0 ? 'rgba(171,139,123,.2)' : 'rgba(255,248,239,.7)';
     ctx.lineWidth = i % 4 === 0 ? 2 : 1;
     ctx.stroke();
   }
@@ -38,33 +38,44 @@ function carpetTexture(): THREE.CanvasTexture {
   canvas.width = canvas.height = 512;
   const ctx = canvas.getContext('2d');
   if (!ctx) throw new Error('Canvas texture unavailable');
-  ctx.fillStyle = '#16483f';
+  ctx.fillStyle = '#b98f91';
   ctx.fillRect(0, 0, 512, 512);
-  ctx.strokeStyle = '#c5a66b';
-  ctx.lineWidth = 3;
-  for (let x = 18; x < 512; x += 64) {
-    for (let y = 18; y < 512; y += 64) {
-      ctx.save(); ctx.translate(x, y); ctx.rotate(Math.PI / 4);
-      ctx.strokeRect(-15, -15, 30, 30);
-      ctx.strokeRect(-8, -8, 16, 16);
-      ctx.restore();
-    }
+  ctx.strokeStyle = 'rgba(248,225,198,.25)'; ctx.lineWidth = 1;
+  for (let i = 0; i < 512; i += 8) {
+    ctx.beginPath(); ctx.moveTo(i,0); ctx.lineTo(i,512); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(0,i); ctx.lineTo(512,i); ctx.stroke();
   }
-  ctx.strokeRect(8, 8, 496, 496);
+  ctx.strokeStyle = '#d8bd91'; ctx.lineWidth = 5;
+  ctx.strokeRect(12,12,488,488); ctx.strokeRect(23,23,466,466);
+  ctx.strokeStyle = 'rgba(249,230,205,.9)'; ctx.lineWidth = 2; ctx.strokeRect(31,31,450,450);
+  for (let x = 64; x < 512; x += 128) for (let y = 64; y < 512; y += 128) {
+    ctx.save(); ctx.translate(x,y);
+    ctx.strokeStyle = '#e6c99e'; ctx.lineWidth = 2;
+    ctx.beginPath(); ctx.arc(0,0,39,0,Math.PI*2); ctx.stroke();
+    for (let p = 0; p < 8; p++) {
+      ctx.save(); ctx.rotate(p*Math.PI/4);
+      ctx.beginPath(); ctx.ellipse(0,-20,8,18,0,0,Math.PI*2);
+      ctx.fillStyle = p%2 ? '#ead2c0' : '#f0dfc8'; ctx.fill();
+      ctx.strokeStyle = '#b68a68'; ctx.lineWidth = 1.4; ctx.stroke(); ctx.restore();
+    }
+    ctx.beginPath(); ctx.arc(0,0,7,0,Math.PI*2); ctx.fillStyle = '#c6a16d'; ctx.fill();
+    ctx.restore();
+  }
   const texture = new THREE.CanvasTexture(canvas);
   texture.colorSpace = THREE.SRGBColorSpace;
   texture.wrapS = texture.wrapT = THREE.RepeatWrapping;
+  texture.anisotropy = 8;
   return texture;
 }
 
 export function createNoorWorld(scene: THREE.Scene): NoorMaterials {
   const marbleMap = marbleTexture();
   const ivory = new THREE.MeshStandardMaterial({ color: 0xffffff, map: marbleMap, roughness: 0.34, metalness: 0.025 });
-  const white = new THREE.MeshStandardMaterial({ color: 0xf7f5ef, roughness: 0.42 });
+  const white = new THREE.MeshStandardMaterial({ color: 0xf5eee8, roughness: 0.42 });
   const gold = new THREE.MeshStandardMaterial({ color: 0xc4a66a, metalness: 0.68, roughness: 0.27 });
   const goldSoft = new THREE.MeshStandardMaterial({ color: 0xd8c18e, metalness: 0.48, roughness: 0.34 });
   const teal = new THREE.MeshStandardMaterial({ color: 0x174b49, roughness: 0.3, metalness: 0.12 });
-  const glass = new THREE.MeshPhysicalMaterial({ color: 0x477c79, roughness: 0.16, metalness: 0.18, transmission: 0.12, transparent: true, opacity: 0.82 });
+  const glass = new THREE.MeshPhysicalMaterial({ color: 0xf0d9bd, roughness: 0.2, metalness: 0.08, transmission: 0.28, transparent: true, opacity: 0.76 });
   const carpet = new THREE.MeshStandardMaterial({ color: 0xffffff, map: carpetTexture(), roughness: 0.96 });
   const water = new THREE.MeshPhysicalMaterial({ color: 0x8db8b5, roughness: 0.12, metalness: 0.2, transparent: true, opacity: 0.82 });
   const shadowStone = new THREE.MeshStandardMaterial({ color: 0xd8d7d0, roughness: 0.65 });
@@ -201,7 +212,7 @@ export function createNoorWorld(scene: THREE.Scene): NoorMaterials {
   for(const side of [-1,1]) box(0.45,0.24,25.8,side*10.78,8.82,-27,teal);
   for(const side of [-1,1]){
     for(const z of [-18,-23,-28,-33,-38]){
-      column(side*8.6,z,8.1,0.28);
+      column(side*8.6,z,6.5,0.28);
       arch(side*8.6,z,4.8,6.5,8.0,0.12,white,'side');
     }
   }

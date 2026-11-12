@@ -94,29 +94,31 @@ export function createNoorWorld(scene: THREE.Scene, palette: Palette) {
       group.add(leaf);
     }
   }
-  function carpetPanel(x: number, z: number, w: number, d: number) {
-    const base = new THREE.Mesh(new THREE.PlaneGeometry(w, d), carpet);
-    base.rotation.x = -Math.PI / 2;
-    base.position.set(x, 0.012, z);
-    group.add(base);
-    for (const inset of [0.16, 0.29]) {
-      const border = new THREE.Mesh(new THREE.PlaneGeometry(w - inset * 2, d - inset * 2), carpetLight);
-      border.rotation.x = -Math.PI / 2;
-      border.position.set(x, 0.019 + inset * 0.001, z);
-      group.add(border);
-      const inner = new THREE.Mesh(new THREE.PlaneGeometry(w - (inset + 0.045) * 2, d - (inset + 0.045) * 2), carpet);
-      inner.rotation.x = -Math.PI / 2;
-      inner.position.set(x, 0.022 + inset * 0.001, z);
-      group.add(inner);
-    }
-    const medallion = new THREE.Mesh(new THREE.CircleGeometry(Math.min(w, d) * 0.19, 32), carpetLight);
-    medallion.rotation.x = -Math.PI / 2;
-    medallion.position.set(x, 0.027, z);
-    group.add(medallion);
-    const center = new THREE.Mesh(new THREE.CircleGeometry(Math.min(w, d) * 0.13, 32), carpet);
-    center.rotation.x = -Math.PI / 2;
-    center.position.set(x, 0.031, z);
-    group.add(center);
+  // Repeated rugs are instanced to keep draw calls low on Android.
+  const rugCount = 42;
+  const rugLayers = [
+    new THREE.InstancedMesh(new THREE.PlaneGeometry(2.35, 3.75), carpet, rugCount),
+    new THREE.InstancedMesh(new THREE.PlaneGeometry(2.03, 3.43), carpetLight, rugCount),
+    new THREE.InstancedMesh(new THREE.PlaneGeometry(1.94, 3.34), carpet, rugCount),
+    new THREE.InstancedMesh(new THREE.PlaneGeometry(1.77, 3.17), carpetLight, rugCount),
+    new THREE.InstancedMesh(new THREE.PlaneGeometry(1.68, 3.08), carpet, rugCount),
+    new THREE.InstancedMesh(new THREE.CircleGeometry(0.4465, 24), carpetLight, rugCount),
+    new THREE.InstancedMesh(new THREE.CircleGeometry(0.3055, 24), carpet, rugCount),
+  ];
+  for (const layer of rugLayers) group.add(layer);
+  const rugTransform = new THREE.Object3D();
+  let rugIndex = 0;
+  function carpetPanel(x: number, z: number) {
+    const y = [0.012, 0.019, 0.022, 0.024, 0.026, 0.029, 0.033];
+    rugLayers.forEach((layer, i) => {
+      rugTransform.position.set(x, y[i], z);
+      rugTransform.rotation.set(-Math.PI / 2, 0, 0);
+      rugTransform.scale.set(1, 1, 1);
+      rugTransform.updateMatrix();
+      layer.setMatrixAt(rugIndex, rugTransform.matrix);
+      layer.instanceMatrix.needsUpdate = true;
+    });
+    rugIndex++;
   }
 
   // A long ivory prayer hall, open toward the courtyard.
@@ -222,7 +224,7 @@ export function createNoorWorld(scene: THREE.Scene, palette: Palette) {
 
   // Prayer carpet field with individual, aligned prayer rugs.
   for (let z = -4; z >= -29; z -= 4.2) {
-    for (let x = -8.4; x <= 8.4; x += 2.8) carpetPanel(x, z, 2.35, 3.75);
+    for (let x = -8.4; x <= 8.4; x += 2.8) carpetPanel(x, z);
   }
 
   // Pendant lanterns: warm metal frames and softly glowing cores.

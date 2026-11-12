@@ -21,12 +21,12 @@ const renderer = new THREE.WebGLRenderer({ antialias: true, powerPreference: 'hi
 renderer.setPixelRatio(Math.min(window.devicePixelRatio, 1.5));
 renderer.shadowMap.enabled = false;
 renderer.toneMapping = THREE.ACESFilmicToneMapping;
-renderer.toneMappingExposure = 1.22;
+renderer.toneMappingExposure = 1.0;
 renderer.outputColorSpace = THREE.SRGBColorSpace;
 app.prepend(renderer.domElement);
 
-scene.add(new THREE.HemisphereLight(0xf4f7ff, 0x7b827b, 2.0));
-const sun = new THREE.DirectionalLight(0xfff0d7, 3.1);
+scene.add(new THREE.HemisphereLight(0xf4f7ff, 0x7b827b, 1.45));
+const sun = new THREE.DirectionalLight(0xfff0d7, 2.15);
 sun.position.set(-18, 28, 12);
 scene.add(sun);
 

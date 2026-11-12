@@ -102,7 +102,7 @@ export function createNoorWorld(scene: THREE.Scene): NoorMaterials {
     return addMesh(new THREE.TubeGeometry(new THREE.CatmullRomCurve3(pts),64,radius,10,false),m);
   };
   const column = (x:number,z:number,height=6.2,r=0.28) => {
-    cylinder(r*0.88,r,height/2,x,height/2,z,white,24);
+    cylinder(r*0.88,r,height,x,height/2,z,white,24);
     cylinder(r*1.55,r*1.55,0.16,x,0.2,z,goldSoft,24);
     cylinder(r*1.3,r*1.3,0.18,x,height-0.18,z,goldSoft,24);
     cylinder(r*1.48,r*1.48,0.12,x,height-0.04,z,white,24);
@@ -131,9 +131,6 @@ export function createNoorWorld(scene: THREE.Scene): NoorMaterials {
     box(3.1,0.16,17,side*13.6,0.04,-1,white);
     const pool=addMesh(new THREE.PlaneGeometry(2.72,16.6),water,side*13.6,0.13,-1);
     pool.rotation.x=-Math.PI/2;
-    for(let i=0;i<7;i++){
-      cylinder(0.045,0.045,0.34,side*13.6,0.29,-8+i*2.2,gold,12);
-    }
   }
 
   // Four-sided open riwaq: paired columns, pointed arches and continuous entablature.
@@ -221,7 +218,7 @@ export function createNoorWorld(scene: THREE.Scene): NoorMaterials {
         for(let i=0;i<16;i++){const a=i*Math.PI/8-Math.PI/2,r=i%2===0?0.58:0.28;const px=Math.cos(a)*r,py=Math.sin(a)*r;if(i===0)s.moveTo(px,py);else s.lineTo(px,py);}
         s.closePath();return s;
       })()),goldSoft,x,8.69,z);
-      medallion.rotation.x=0;
+      medallion.rotation.x=-Math.PI/2;
     }
   }
   for(const z of [-21,-28,-35]){

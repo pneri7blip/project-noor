@@ -91,21 +91,34 @@ export function createNoorWorld(scene: THREE.Scene): NoorMaterials {
     const mesh=addMesh(new THREE.TorusGeometry(r,t,10,64),m,x,y,z); mesh.rotation.x=Math.PI/2; return mesh;
   };
   const arch = (x:number,z:number,width:number,spring:number,peak:number,radius:number,m:THREE.Material,axis:'front'|'side'='front') => {
-    const pts:THREE.Vector3[]=[];
+    // Two rising curves meet at a true pointed apex instead of forming a semicircle.
     const half=width/2;
-    for(let i=0;i<=32;i++){
-      const a=Math.PI-(i/32)*Math.PI;
-      const across=Math.cos(a)*half;
-      const y=spring+Math.sin(a)*(peak-spring);
+    const pts:THREE.Vector3[]=[];
+    for(let i=0;i<=20;i++){
+      const t=i/20;
+      const across=-half+(half*t);
+      const y=spring+(peak-spring)*Math.sin(t*Math.PI/2);
+      pts.push(axis==='front'?new THREE.Vector3(x+across,y,z):new THREE.Vector3(x,y,z+across));
+    }
+    for(let i=20;i>=0;i--){
+      const t=i/20;
+      const across=half-(half*t);
+      const y=spring+(peak-spring)*Math.sin(t*Math.PI/2);
       pts.push(axis==='front'?new THREE.Vector3(x+across,y,z):new THREE.Vector3(x,y,z+across));
     }
     return addMesh(new THREE.TubeGeometry(new THREE.CatmullRomCurve3(pts),64,radius,10,false),m);
   };
   const column = (x:number,z:number,height=6.2,r=0.28) => {
-    cylinder(r*0.88,r,height,x,height/2,z,ivory,24);
-    cylinder(r*1.55,r*1.55,0.16,x,0.045,z,goldSoft,24);
-    cylinder(r*1.3,r*1.3,0.18,x,height-0.18,z,goldSoft,24);
-    cylinder(r*1.48,r*1.48,0.12,x,height-0.04,z,ivory,24);
+    // Continuous shaft seated on a stepped marble plinth, with a capital aligned to the springing.
+    cylinder(r*1.9,r*1.9,0.18,x,0.09,z,ivory,32);
+    cylinder(r*1.45,r*1.45,0.12,x,0.24,z,goldSoft,32);
+    cylinder(r*0.88,r,height-0.48,x,height/2,z,ivory,32);
+    cylinder(r*1.35,r*1.35,0.16,x,height-0.28,z,goldSoft,32);
+    cylinder(r*1.72,r*1.48,0.24,x,height-0.08,z,ivory,32);
+    const cap=box(r*2.35,0.16,r*2.35,x,height+0.12,z,ivory);
+    cap.rotation.y=Math.PI/4;
+    const capBand=box(r*2.5,0.045,r*2.5,x,height+0.025,z,goldSoft);
+    capBand.rotation.y=Math.PI/4;
   };
   const dome = (x:number,z:number,r:number,baseY:number,material:THREE.Material) => {
     cylinder(r*1.02,r*1.02,0.34,x,baseY,z,white,48);
@@ -136,15 +149,15 @@ export function createNoorWorld(scene: THREE.Scene): NoorMaterials {
   // Four-sided open riwaq: paired columns, pointed arches and continuous entablature.
   for(const side of [-1,1]){
     for(let z=-10;z<=10;z+=5){
-      column(side*10.1,z,6.4,0.3);
-      column(side*16.1,z,6.4,0.3);
+      column(side*10.1,z,4.0,0.3);
+      column(side*16.1,z,4.0,0.3);
       arch(side*13.1,z,6.0,4.0,6.15,0.13,white,'side');
     }
     box(6.4,0.42,22,side*13.1,6.55,0,ivory);
     box(6.4,0.12,22,side*13.1,6.82,0,goldSoft);
   }
   for(const z of [-10,10]){
-    for(const x of [-13.1,-7.1,7.1,13.1]) column(x,z,6.4,0.3);
+    for(const x of [-13.1,-7.1,7.1,13.1]) column(x,z,4.0,0.3);
     arch(0,z,26.2,4.0,6.15,0.14,white,'front');
     box(26.5,0.42,0.5,0,6.55,z,ivory);
     box(26.5,0.1,0.14,0,6.82,z,goldSoft);

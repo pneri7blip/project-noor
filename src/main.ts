@@ -13,8 +13,8 @@ const pauseButton = document.querySelector<HTMLButtonElement>('#pause-action')!;
 const presenceNote = document.querySelector<HTMLDivElement>('#presence-note')!;
 
 const scene = new THREE.Scene();
-scene.background = new THREE.Color(0xd8e4e8);
-scene.fog = new THREE.Fog(0xd8e4e8, 68, 132);
+scene.background = new THREE.Color(0xe8ded5);
+scene.fog = new THREE.Fog(0xe8ded5, 72, 138);
 
 const camera = new THREE.PerspectiveCamera(48, 1, 0.1, 100);
 const renderer = new THREE.WebGLRenderer({ antialias: true, powerPreference: 'high-performance' });
@@ -25,8 +25,8 @@ renderer.toneMappingExposure = 1.0;
 renderer.outputColorSpace = THREE.SRGBColorSpace;
 app.prepend(renderer.domElement);
 
-scene.add(new THREE.HemisphereLight(0xf4f7ff, 0x7b827b, 1.45));
-const sun = new THREE.DirectionalLight(0xfff0d7, 2.15);
+scene.add(new THREE.HemisphereLight(0xfff2e5, 0x89796f, 1.55));
+const sun = new THREE.DirectionalLight(0xffe2c1, 2.0);
 sun.position.set(-18, 28, 12);
 scene.add(sun);
 

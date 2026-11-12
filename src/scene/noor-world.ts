@@ -102,10 +102,10 @@ export function createNoorWorld(scene: THREE.Scene): NoorMaterials {
     return addMesh(new THREE.TubeGeometry(new THREE.CatmullRomCurve3(pts),64,radius,10,false),m);
   };
   const column = (x:number,z:number,height=6.2,r=0.28) => {
-    cylinder(r*0.88,r,height,x,height/2,z,white,24);
-    cylinder(r*1.55,r*1.55,0.16,x,0.2,z,goldSoft,24);
+    cylinder(r*0.88,r,height,x,height/2,z,ivory,24);
+    cylinder(r*1.55,r*1.55,0.16,x,0.045,z,goldSoft,24);
     cylinder(r*1.3,r*1.3,0.18,x,height-0.18,z,goldSoft,24);
-    cylinder(r*1.48,r*1.48,0.12,x,height-0.04,z,white,24);
+    cylinder(r*1.48,r*1.48,0.12,x,height-0.04,z,ivory,24);
   };
   const dome = (x:number,z:number,r:number,baseY:number,material:THREE.Material) => {
     cylinder(r*1.02,r*1.02,0.34,x,baseY,z,white,48);

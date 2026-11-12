@@ -30,6 +30,7 @@ scene.add(sun);
 const materials = {
   avatar: new THREE.MeshStandardMaterial({ color: 0x526d60, roughness: 0.9 }),
   trim: new THREE.MeshStandardMaterial({ color: 0xb69a68, roughness: 0.38, metalness: 0.28 }),
+  stone: new THREE.MeshStandardMaterial({ color: 0xd6c6a4, roughness: 0.62 }),
   skin: new THREE.MeshStandardMaterial({ color: 0xb98d6b, roughness: 1 }),
   dark: new THREE.MeshStandardMaterial({ color: 0x26352f, roughness: 0.9 }),
 };

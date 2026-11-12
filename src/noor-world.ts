@@ -44,20 +44,35 @@ export function createNoorWorld(scene: THREE.Scene, palette: Palette) {
     const half = width / 2;
     const curve = new THREE.QuadraticBezierCurve3(
       new THREE.Vector3(x - half, springY, z),
-      new THREE.Vector3(x, apexY + 0.8, z),
+      new THREE.Vector3(x, 2 * apexY - springY, z),
       new THREE.Vector3(x + half, springY, z),
     );
     const arch = new THREE.Mesh(new THREE.TubeGeometry(curve, 40, tube, 12, false), material);
     group.add(arch);
     const inner = new THREE.QuadraticBezierCurve3(
       new THREE.Vector3(x - half + 0.27, springY, z - 0.015),
-      new THREE.Vector3(x, apexY + 0.34, z - 0.015),
+      new THREE.Vector3(x, 2 * (apexY - 0.34) - springY, z - 0.015),
       new THREE.Vector3(x + half - 0.27, springY, z - 0.015),
     );
     group.add(new THREE.Mesh(new THREE.TubeGeometry(inner, 40, 0.055, 8, false), gold));
   }
+  function sideArch(x: number, z: number, width: number, springY: number, apexY: number, material: THREE.Material) {
+    const half = width / 2;
+    const curve = new THREE.QuadraticBezierCurve3(
+      new THREE.Vector3(x, springY, z - half),
+      new THREE.Vector3(x, 2 * apexY - springY, z),
+      new THREE.Vector3(x, springY, z + half),
+    );
+    group.add(new THREE.Mesh(new THREE.TubeGeometry(curve, 36, 0.19, 10, false), material));
+    const inner = new THREE.QuadraticBezierCurve3(
+      new THREE.Vector3(x - 0.02, springY, z - half + 0.25),
+      new THREE.Vector3(x - 0.02, 2 * (apexY - 0.32) - springY, z),
+      new THREE.Vector3(x - 0.02, springY, z + half - 0.25),
+    );
+    group.add(new THREE.Mesh(new THREE.TubeGeometry(inner, 36, 0.055, 8, false), gold));
+  }
   function column(x: number, z: number, height = 7.3) {
-    cylinder(0.43, 0.54, height, ivory, x, height / 2, z, 40);
+    cylinder(0.43, 0.54, height, ivory, x, height / 2, z, 48);
     cylinder(0.57, 0.57, 0.24, blush, x, 0.12, z);
     cylinder(0.5, 0.5, 0.12, gold, x, 0.29, z);
     cylinder(0.59, 0.59, 0.24, blush, x, height - 0.12, z);
@@ -65,6 +80,19 @@ export function createNoorWorld(scene: THREE.Scene, palette: Palette) {
     cylinder(0.7, 0.7, 0.32, ivory, x, height + 0.12, z);
     torus(0.52, 0.045, gold, x, 1.1, z);
     torus(0.52, 0.045, gold, x, height - 0.85, z);
+    // Fine vertical flutes and a layered capital give the shafts a carved finish.
+    for (let i = 0; i < 16; i++) {
+      const a = (i / 16) * Math.PI * 2;
+      const flute = new THREE.Mesh(new THREE.CylinderGeometry(0.018, 0.022, height - 1.55, 6), blush);
+      flute.position.set(x + Math.cos(a) * 0.438, height / 2, z + Math.sin(a) * 0.438);
+      group.add(flute);
+      const leaf = new THREE.Mesh(new THREE.SphereGeometry(0.13, 10, 8), gold);
+      leaf.scale.set(0.7, 1.55, 0.48);
+      leaf.position.set(x + Math.cos(a) * 0.55, height - 0.62, z + Math.sin(a) * 0.55);
+      leaf.rotation.z = Math.cos(a) * 0.34;
+      leaf.rotation.x = Math.sin(a) * 0.34;
+      group.add(leaf);
+    }
   }
   function carpetPanel(x: number, z: number, w: number, d: number) {
     const base = new THREE.Mesh(new THREE.PlaneGeometry(w, d), carpet);
@@ -102,10 +130,44 @@ export function createNoorWorld(scene: THREE.Scene, palette: Palette) {
   for (const z of [-1, -9, -17, -25, -33]) {
     for (const x of [-11.9, 11.9]) {
       column(x, z, 7.2);
-      const wallX = x < 0 ? -13.25 : 13.25;
-      pointedArch(wallX, z, 4.2, 6.7, 9.5, ivory, 0.2);
+
     }
   }
+  // Side arcades now follow the long axis of the hall, joining each column bay.
+  for (const z of [-5, -13, -21, -29]) {
+    sideArch(-13.12, z, 8.0, 6.75, 9.35, ivory);
+    sideArch(13.12, z, 8.0, 6.75, 9.35, ivory);
+  }
+
+  // Recessed stained-glass panels and carved surrounds along both side walls.
+  for (const z of [-5, -13, -21, -29]) {
+    for (const side of [-1, 1]) {
+      const x = side * 13.245;
+      const pane = new THREE.Mesh(new THREE.PlaneGeometry(2.15, 3.7), new THREE.MeshStandardMaterial({
+        color: 0x738c83, roughness: 0.32, metalness: 0.12, emissive: 0x243b35, emissiveIntensity: 0.22,
+        side: THREE.DoubleSide,
+      }));
+      pane.rotation.y = side * Math.PI / 2;
+      pane.position.set(x, 4.35, z);
+      group.add(pane);
+      for (const offset of [-1.22, 1.22]) box(0.16, 4.2, 0.18, gold, side * 13.17, 4.35, z + offset);
+      box(0.18, 0.16, 2.6, gold, side * 13.17, 6.48, z);
+      box(0.18, 0.16, 2.6, gold, side * 13.17, 2.22, z);
+      for (let k = -1; k <= 1; k++) {
+        const grille = box(0.08, 3.55, 0.08, blush, side * 13.12, 4.35, z + k * 0.58);
+        grille.rotation.y = side * Math.PI / 2;
+      }
+      const rosette = new THREE.Mesh(new THREE.CircleGeometry(0.34, 8), gold);
+      rosette.position.set(side * 13.08, 7.05, z);
+      rosette.rotation.y = side * Math.PI / 2;
+      group.add(rosette);
+      const rosetteCore = new THREE.Mesh(new THREE.CircleGeometry(0.2, 8), blush);
+      rosetteCore.position.set(side * 13.06, 7.05, z);
+      rosetteCore.rotation.y = side * Math.PI / 2;
+      group.add(rosetteCore);
+    }
+  }
+
   // Transverse arches create a rhythmic sequence of bays.
   for (const z of [-5, -13, -21, -29]) {
     pointedArch(0, z, 22.8, 7.0, 10.0, blush, 0.22);
@@ -119,9 +181,11 @@ export function createNoorWorld(scene: THREE.Scene, palette: Palette) {
   // Central dome with a layered drum, luminous ribs and a finial.
   cylinder(8.15, 8.15, 1.2, blush, 0, 9.0, -18, 64);
   torus(8.12, 0.16, gold, 0, 9.58, -18);
+  const domeMaterial = ivory.clone();
+  domeMaterial.side = THREE.DoubleSide;
   const dome = new THREE.Mesh(
     new THREE.SphereGeometry(8, 64, 40, 0, Math.PI * 2, 0, Math.PI / 2),
-    ivory,
+    domeMaterial,
   );
   dome.position.set(0, 9.55, -18);
   group.add(dome);

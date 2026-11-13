@@ -6,9 +6,9 @@ const M = {
   gold: new THREE.MeshStandardMaterial({ color: 0xb58c50, roughness: .3, metalness: .68 }),
   paleGold: new THREE.MeshStandardMaterial({ color: 0xd8bd82, roughness: .28, metalness: .55 }),
   marble: new THREE.MeshStandardMaterial({ color: 0x263c38, roughness: .32, metalness: .1 }),
-  walnut: new THREE.MeshStandardMaterial({ color: 0x68452f, roughness: .5 }),
+  walnut: new THREE.MeshStandardMaterial({ color: 0x68452f, roughness: .5, side: THREE.DoubleSide }),
   glass: new THREE.MeshPhysicalMaterial({ color: 0xc5d8d3, roughness: .12, transmission: .28, transparent: true, opacity: .82, emissive: 0x718c85, emissiveIntensity: .25, side: THREE.DoubleSide }),
-  recess: new THREE.MeshStandardMaterial({ color: 0xd7d0c4, roughness: .94 }),
+  recess: new THREE.MeshStandardMaterial({ color: 0xd7d0c4, roughness: .94, side: THREE.DoubleSide }),
   glow: new THREE.MeshBasicMaterial({ color: 0xffdfa6 }),
 };
 

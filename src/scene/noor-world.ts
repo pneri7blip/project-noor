@@ -81,10 +81,11 @@ function windowPanel(parent: THREE.Object3D,x:number,z:number,rot:number,w:numbe
   addArch(parent,x,z+.08,w+.16,h+.12,1.05,rot,M.gold,.07);
 }
 function mihrab(parent: THREE.Object3D,z:number,w:number,h:number) {
+  const face = z > 0 ? -1 : 1;
   addArchPanel(parent,0,.7,z,w,h,M.recess);
-  addArch(parent,0,z+.06,w+.38,h+.24,.7,0,M.gold,.13);
-  addArch(parent,0,z+.02,w+.68,h+.42,.7,0,M.paleGold,.045);
-  const tile=addBox(parent,new THREE.PlaneGeometry(w*.72,h*.32),mosaic,0,.7+h*.53,z+.08);
+  addArch(parent,0,z+face*.06,w+.38,h+.24,.7,0,M.gold,.13);
+  addArch(parent,0,z+face*.02,w+.68,h+.42,.7,0,M.paleGold,.045);
+  const tile=addBox(parent,new THREE.PlaneGeometry(w*.72,h*.32),mosaic,0,.7+h*.53,z+face*.08);
   tile.material.side=THREE.DoubleSide;
 }
 function lantern(parent: THREE.Object3D,x:number,y:number,z:number,s=1) {

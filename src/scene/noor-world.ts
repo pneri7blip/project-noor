@@ -40,7 +40,7 @@ function addArchPanel(parent: THREE.Object3D, x: number, y: number, z: number, w
   const m = new THREE.Mesh(new THREE.ShapeGeometry(archShape(w,h), 20), mat);
   m.position.set(x,y,z); m.rotation.y = rot; parent.add(m); return m;
 }
-function pattern(kind: 'rug'|'entry'|'screen'|'mosaic') {
+function pattern(kind: 'rug'|'entry'|'screen'|'mosaic'|'marble') {
   const c = document.createElement('canvas'); c.width = c.height = 768;
   const g = c.getContext('2d')!;
   if (kind === 'screen') {
@@ -49,6 +49,12 @@ function pattern(kind: 'rug'|'entry'|'screen'|'mosaic') {
   } else if (kind === 'mosaic') {
     g.fillStyle='#d9c8a9';g.fillRect(0,0,768,768);
     for(let y=0;y<768;y+=96)for(let x=0;x<768;x+=96){g.save();g.translate(x+48,y+48);g.rotate(Math.PI/8);g.strokeStyle=(x+y)%192?'#71847a':'#a67c48';g.lineWidth=5;g.strokeRect(-30,-30,60,60);g.beginPath();g.moveTo(0,-42);g.lineTo(42,0);g.lineTo(0,42);g.lineTo(-42,0);g.closePath();g.stroke();g.restore();}
+  } else if (kind === 'marble') {
+    g.fillStyle='#e9e3d9';g.fillRect(0,0,768,768);
+    g.strokeStyle='rgba(155,137,115,.22)';g.lineWidth=2;
+    for(let i=0;i<26;i++){const y=i*31;g.beginPath();g.moveTo(-20,y);g.bezierCurveTo(170,y-55,430,y+70,790,y-22);g.stroke();}
+    g.strokeStyle='rgba(255,255,255,.48)';g.lineWidth=1;
+    for(let i=0;i<768;i+=256){g.beginPath();g.moveTo(i,0);g.lineTo(i,768);g.stroke();g.beginPath();g.moveTo(0,i);g.lineTo(768,i);g.stroke();}
   } else {
     const light=kind==='entry'; g.fillStyle=light?'#d9d1c3':'#315653';g.fillRect(0,0,768,768);
     g.fillStyle=light?'#a9875c':'#b99560';g.fillRect(20,20,728,728);
@@ -64,6 +70,7 @@ const rug = new THREE.MeshStandardMaterial({map:pattern('rug'),roughness:.96,sid
 const entryRug = new THREE.MeshStandardMaterial({map:pattern('entry'),roughness:.96,side:THREE.DoubleSide});
 const screen = new THREE.MeshBasicMaterial({map:pattern('screen'),transparent:true,side:THREE.DoubleSide,depthWrite:false});
 const mosaic = new THREE.MeshStandardMaterial({map:pattern('mosaic'),roughness:.65,side:THREE.DoubleSide});
+const marble = new THREE.MeshStandardMaterial({map:pattern('marble'),roughness:.3,metalness:.04});
 
 function column(parent: THREE.Object3D,x:number,z:number,h=7.5) {
   const shaftH=h-1.1;
@@ -128,7 +135,7 @@ export function createNoorWorld(scene: THREE.Scene) {
   world.add(new THREE.HemisphereLight(0xfff7e9,0x77766c,1.45));
   const sun=new THREE.DirectionalLight(0xfff2dc,2.1);sun.position.set(-10,16,9);sun.castShadow=true;sun.shadow.mapSize.set(1024,1024);sun.shadow.camera.left=-24;sun.shadow.camera.right=24;sun.shadow.camera.top=24;sun.shadow.camera.bottom=-42;world.add(sun);
   const sky=new THREE.DirectionalLight(0xdde9ee,.75);sky.position.set(-14,9,1);world.add(sky);
-  const floor=addBox(world,new THREE.PlaneGeometry(24,60),new THREE.MeshStandardMaterial({color:0xe9e3d9,roughness:.32}),0,-.035,-9);floor.rotation.x=-Math.PI/2;
+  const floor=addBox(world,new THREE.PlaneGeometry(24,60),marble,0,-.035,-9);floor.rotation.x=-Math.PI/2;
   const entry=new THREE.Mesh(new THREE.PlaneGeometry(10.8,13.8),entryRug);entry.rotation.x=-Math.PI/2;entry.position.set(0,.012,7.4);world.add(entry);
   const main=new THREE.Mesh(new THREE.PlaneGeometry(14.8,30),rug);main.rotation.x=-Math.PI/2;main.position.set(0,.015,-20.5);world.add(main);
 
@@ -136,6 +143,10 @@ export function createNoorWorld(scene: THREE.Scene) {
   addBox(world,new THREE.BoxGeometry(.32,7.4,24.2),M.plaster,-7.65,3.7,8);
   addBox(world,new THREE.BoxGeometry(.32,7.4,24.2),M.plaster,7.65,3.7,8);
   addBox(world,new THREE.BoxGeometry(15.3,7.4,.36),M.plaster,0,3.7,20);
+  for(const x of [-7.42,7.42]){
+    addBox(world,new THREE.BoxGeometry(.12,.22,24),M.gold,x,.42,8);
+    addBox(world,new THREE.BoxGeometry(.12,.18,24),M.paleGold,x,6.95,8);
+  }
   mihrab(world,19.78,3.5,5.8);
   for(const z of [1.8,8,14.2])windowPanel(world,-7.43,z,Math.PI/2,2.5,5.45);
   shelf(world);
@@ -152,6 +163,10 @@ export function createNoorWorld(scene: THREE.Scene) {
   // Main prayer hall, with deep arcades and a central dome.
   addBox(world,new THREE.BoxGeometry(.42,12.2,34.8),M.plaster,-11.35,6.1,-21);
   addBox(world,new THREE.BoxGeometry(.42,12.2,34.8),M.plaster,11.35,6.1,-21);
+  for(const x of [-11.08,11.08]){
+    addBox(world,new THREE.BoxGeometry(.14,.24,34.2),M.gold,x,.48,-21);
+    addBox(world,new THREE.BoxGeometry(.14,.18,34.2),M.paleGold,x,10.35,-21);
+  }
   addBox(world,new THREE.BoxGeometry(5.1,.4,35.2),M.plaster,-8.85,12.05,-21);
   addBox(world,new THREE.BoxGeometry(5.1,.4,35.2),M.plaster,8.85,12.05,-21);
   const rows=[-7.2,-15.4,-23.6,-31.8];

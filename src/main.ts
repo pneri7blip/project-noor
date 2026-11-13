@@ -1,11 +1,8 @@
 import * as THREE from 'three';
-import { createArchitecture, createArchitectureMaterials } from './scene/architecture';
-import { loadAssetPrayerHall } from './scene/asset-hall';
-import { loadAssetMosqueEnvironment } from './scene/asset-mosque-environment';
 import './style.css';
+import { createNoorWorld } from './scene/noor-world';
 
 const app = document.querySelector<HTMLDivElement>('#app')!;
-const loading = document.querySelector<HTMLDivElement>('#loading')!;
 const hint = document.querySelector<HTMLDivElement>('#hint')!;
 const resetButton = document.querySelector<HTMLButtonElement>('#reset-camera')!;
 const joystick = document.querySelector<HTMLDivElement>('#joystick')!;
@@ -13,27 +10,29 @@ const joystickKnob = document.querySelector<HTMLDivElement>('#joystick-knob')!;
 const greetButton = document.querySelector<HTMLButtonElement>('#greet-action')!;
 const pauseButton = document.querySelector<HTMLButtonElement>('#pause-action')!;
 const presenceNote = document.querySelector<HTMLDivElement>('#presence-note')!;
-const useMosquePreview = new URLSearchParams(window.location.search).get('environment') === 'mosque';
 
 const scene = new THREE.Scene();
-scene.background = new THREE.Color(0xc9c4b4);
-scene.fog = new THREE.Fog(0xc9c4b4, 34, 72);
+scene.background = new THREE.Color(0xe7e1d7);
 
 const camera = new THREE.PerspectiveCamera(48, 1, 0.1, 100);
 const renderer = new THREE.WebGLRenderer({ antialias: true, powerPreference: 'high-performance' });
-renderer.setPixelRatio(Math.min(window.devicePixelRatio, 1.5));
-renderer.shadowMap.enabled = false;
+renderer.setPixelRatio(Math.min(window.devicePixelRatio, 1.25));
+renderer.shadowMap.enabled = true;
+renderer.shadowMap.type = THREE.PCFSoftShadowMap;
 renderer.toneMapping = THREE.ACESFilmicToneMapping;
 renderer.toneMappingExposure = 1.12;
 renderer.outputColorSpace = THREE.SRGBColorSpace;
 app.prepend(renderer.domElement);
 
-scene.add(new THREE.HemisphereLight(0xfff1d8, 0x6c7764, 1.8));
-const sun = new THREE.DirectionalLight(0xffdfb0, 2.7);
-sun.position.set(-8, 14, 7);
-scene.add(sun);
+const worldBounds = createNoorWorld(scene);
 
-const materials = useMosquePreview ? createArchitectureMaterials() : createArchitecture(scene);
+const materials = {
+  avatar: new THREE.MeshStandardMaterial({ color: 0x526d60, roughness: 0.9 }),
+  trim: new THREE.MeshStandardMaterial({ color: 0xb69a68, roughness: 0.38, metalness: 0.28 }),
+  stone: new THREE.MeshStandardMaterial({ color: 0xd6c6a4, roughness: 0.62 }),
+  skin: new THREE.MeshStandardMaterial({ color: 0xb98d6b, roughness: 1 }),
+  dark: new THREE.MeshStandardMaterial({ color: 0x26352f, roughness: 0.9 }),
+};
 
 // Procedural humanoid with articulated limbs and a lightweight walk cycle.
 // The rig is built from reusable smooth meshes so it needs no external model download.
@@ -108,7 +107,7 @@ for (const side of [-1, 1]) {
   avatar.add(legPivot);
   legPivots.push(legPivot);
 }
-avatar.position.set(0, 0, 5);
+avatar.position.set(0, 0, 9);
 scene.add(avatar);
 
 let walkBlend = 0;
@@ -117,7 +116,7 @@ let gesture: 'none' | 'greet' = 'none';
 let gestureStarted = 0;
 let paused = false;
 let angle = 0;
-let distance = 8.5;
+let distance = 7.5;
 let cameraHeight = 4.2;
 let joystickPointer: number | null = null;
 let joystickAxes = { x: 0, y: 0 };
@@ -201,7 +200,7 @@ renderer.domElement.addEventListener('pointercancel', endPointer);
 renderer.domElement.addEventListener('wheel', (event) => {
   distance = THREE.MathUtils.clamp(distance + event.deltaY * 0.008, 5.5, 15);
 }, { passive: true });
-resetButton.addEventListener('click', () => { angle = 0; distance = 8.5; cameraHeight = 4.2; });
+resetButton.addEventListener('click', () => { angle = 0; distance = 7.5; cameraHeight = 4.2; });
 function updateJoystick(event: PointerEvent) {
   const rect = joystick.getBoundingClientRect();
   const radius = rect.width * 0.36;
@@ -279,8 +278,8 @@ function animate() {
     );
     avatar.rotation.y += THREE.MathUtils.clamp(yawDifference, -4.8 * dt, 4.8 * dt);
     avatar.position.addScaledVector(delta, 2.05 * dt);
-    avatar.position.x = THREE.MathUtils.clamp(avatar.position.x, -14.5, 14.5);
-    avatar.position.z = THREE.MathUtils.clamp(avatar.position.z, -37.2, 14.5);
+    avatar.position.x = THREE.MathUtils.clamp(avatar.position.x, worldBounds.minX, worldBounds.maxX);
+    avatar.position.z = THREE.MathUtils.clamp(avatar.position.z, worldBounds.minZ, worldBounds.maxZ);
   }
 
   walkBlend = THREE.MathUtils.damp(walkBlend, moving ? 1 : 0, 9, dt);
@@ -311,16 +310,4 @@ function animate() {
   requestAnimationFrame(animate);
 }
 animate();
-if (useMosquePreview) {
-  void loadAssetMosqueEnvironment(scene).then((loaded) => {
-    if (!loaded) {
-      createArchitecture(scene);
-      void loadAssetPrayerHall(scene);
-    }
-    loading.remove();
-  });
-} else {
-  void loadAssetPrayerHall(scene);
-  loading.remove();
-}
 window.setTimeout(() => { hint.style.opacity = '0'; }, 6500);

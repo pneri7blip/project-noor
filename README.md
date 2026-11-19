@@ -2,7 +2,7 @@
 
 **A spiritual place without borders.**
 
-Project Noor is an early-stage exploration of a calm, shared digital environment inspired by the immediate, atmospheric user experience of Sansa, thoughtfully adapted for Muslim users.
+Project Noor is an early-stage exploration of a calm, shared digital environment designed for Muslim users.
 
 The product idea is simple: enter, be present, find peace, and leave whenever you want.
 
@@ -23,8 +23,6 @@ The experience should feel meaningful even when a visitor is alone.
 - Calm, accessible, mobile-first interaction.
 - Respect for Islamic practice and the diversity of Muslim traditions.
 - Privacy by design; religious activity must never become an advertising or profiling signal.
-
-**Sansa is the permanent product benchmark for Noor.** Every major UX and technical decision must be compared against its strengths: immediate browser entry, intuitive avatar movement, simple gestures, atmospheric spaces, quiet shared presence, and a minimal interface. Noor must adapt these principles to an Islamic context rather than copy Buddhist symbols, rituals, assets, or content. Public reporting confirms that Sansa was created with ChatGPT Codex using vibe coding; its exact framework and backend architecture have not been publicly established. We will not pretend otherwise.
 
 ## First milestone
 
@@ -52,7 +50,7 @@ Project Noor is a digital environment for reflection and community. It does **no
 ## Current status
 
 **Stage:** single-user browser-based 3D prototype. The current source implements continuous one-finger avatar steering, two-finger camera orbit/vertical adjustment and pinch zoom, a procedural articulated avatar, and a bottom action layer. The latest recorded main-branch build passed on 9 November 2026; the new visual-direction branch still requires its own CI run and Android device validation.  
-**Stack:** Three.js + TypeScript + Vite. This is Noor's current implementation, not a claim about Sansa's undisclosed stack.  
+**Stack:** Three.js + TypeScript + Vite.  
 **Next step:** replace the geometric blockout with properly licensed, optimized 3D assets and move toward a more convincing environment and rigged avatar; then validate Android performance.
 
 This repository is an evolving product workspace. Scope and implementation choices may change after testing with real users.

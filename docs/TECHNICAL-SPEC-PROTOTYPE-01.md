@@ -27,7 +27,7 @@ This prototype validates navigation, mobile performance, and atmosphere. It is n
 | 3D asset format | glTF/GLB when real assets are introduced | Common web 3D interchange format |
 | Source control | Existing private GitHub repository | Version history and backup; not the development environment itself |
 
-**Decision:** Three.js is selected for the first prototype, not claimed to be Sansa's internal technology. The choice remains subject to real-device validation. See [ENGINE-DECISION.md](ENGINE-DECISION.md).
+**Decision:** Three.js is selected for the first prototype. The choice remains subject to real-device validation. See [ENGINE-DECISION.md](ENGINE-DECISION.md).
 
 ## 3. Explicitly deferred
 

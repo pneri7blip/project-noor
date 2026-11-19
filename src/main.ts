@@ -293,7 +293,7 @@ function animate() {
   armPivots[0].rotation.z = -0.045 - walkBlend * 0.025;
   armPivots[1].rotation.z = 0.045 + walkBlend * 0.025;
 
-  // A brief hand-to-chest greeting, inspired by Sansa's simple social gestures.
+  // A brief hand-to-chest greeting gesture.
   const greetElapsed = elapsed - gestureStarted;
   const greetEnvelope = gesture === 'greet' ? Math.sin(Math.min(1, greetElapsed / 1.25) * Math.PI) : 0;
   armPivots[1].rotation.z += -0.95 * greetEnvelope;

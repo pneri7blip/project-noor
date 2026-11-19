@@ -21,9 +21,6 @@ No engine is declared the performance winner. A published October 2026 benchmark
 
 The actual acceptance decision must be based on measurements on the target phone in its real browser. The current prototype disables real-time shadows, caps device pixel ratio, uses simple geometry, and keeps the first scene intentionally small.
 
-## Sansa reference
-
-Public reporting confirms that Sansa's creator used OpenAI Codex and a natural-language/vibe-coding workflow. The available public sources do not establish Sansa's 3D engine, language, framework, or repository workflow. This decision therefore copies observed interaction principles, not an unverified technical stack.
 
 ## Reconsider Babylon.js if
 
@@ -45,4 +42,3 @@ Public reporting confirms that Sansa's creator used OpenAI Codex and a natural-l
 - Three.js WebGLRenderer documentation: https://threejs.org/docs/pages/WebGLRenderer
 - Babylon.js engine specifications: https://www.babylonjs.com/specifications/
 - October 2026 comparative synthetic benchmark (Pixel 8 Pro): https://www.webkkk.net/mvaligursky/web-engines-compare
-- Public Sansa reporting and UX research are recorded in the project research notes; no unverified claim about Sansa's engine is made here.

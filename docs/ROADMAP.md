@@ -12,7 +12,7 @@
 - [x] Define the first prototype scope.
 - [x] Build and open the initial Three.js + TypeScript + Vite prototype on the target Android phone.
 - [ ] Define the Android test-device and browser baseline.
-- [x] Establish Sansa as the permanent UX benchmark; adapt its browser-first, low-friction, atmospheric and quiet-presence principles to Noor.
+- [x] Define Noor's core UX principles: browser-first access, low friction, calm atmosphere, and quiet presence.
 
 **Exit criteria:** the first prototype can be built without unresolved product-scope questions.
 

@@ -3,7 +3,7 @@
 **Status:** Initial implementation added; build and device validation pending  
 **Stage:** Single-user Android-first 3D prototype  
 **Repository:** `pneri7blip/project-noor`  
-**Decision rule:** implement the smallest scene that can validate the Sansa-inspired mobile interaction model. Do not build multiplayer, accounts, or monetization in this prototype.
+**Decision rule:** implement the smallest scene that can validate the Noor's mobile interaction model. Do not build multiplayer, accounts, or monetization in this prototype.
 
 ## 1. Objective
 
@@ -22,7 +22,7 @@ This prototype validates navigation, mobile performance, and atmosphere. It is n
 | Layer | Proposed choice | Reason |
 |---|---|---|
 | Language | TypeScript | Explicit types and easier maintenance of AI-generated code |
-| 3D rendering | Three.js | Flexible browser-native 3D rendering and control over the Sansa-like UX |
+| 3D rendering | Three.js | Flexible browser-native 3D rendering and control over the Noor's intended interaction model |
 | Build tool | Vite | Lightweight development/build workflow |
 | 3D asset format | glTF/GLB when real assets are introduced | Common web 3D interchange format |
 | Source control | Existing private GitHub repository | Version history and backup; not the development environment itself |
@@ -58,7 +58,7 @@ Use simple geometry and placeholder materials first. Do not spend time producing
 
 ### Visual direction
 
-- Calm, respectful, spacious, and recognizably Islamic in architectural language without copying Sansa's assets or exact design.
+- Calm, respectful, spacious, and recognizably Islamic in architectural language using original or properly licensed assets and an original visual identity.
 - Natural daylight, restrained materials, greenery, and optional subtle water.
 - No game HUD, scores, quests, badges, leaderboards, or combat/game mechanics.
 - The scene must remain visually coherent when empty.

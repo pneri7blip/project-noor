@@ -12,7 +12,7 @@ The intended experience is immediate and low-pressure:
 
 > Enter. Be present. Find peace. Leave whenever you want.
 
-The product takes inspiration from the immediacy and atmospheric user experience of Sansa. This is a UX reference, not a plan to copy its brand, assets, code, or proprietary content.
+The product will develop its own visual identity and interaction language, guided by its principles of immediate access, calm atmosphere, and low-pressure presence.
 
 ## 2. The problem to explore
 
